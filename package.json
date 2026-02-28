@@ -1,0 +1,32 @@
+{
+  "name": "dermify-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js"
+},
+  
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quoctinhstudy1911-crypto/dermify-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/quoctinhstudy1911-crypto/dermify-server/issues"
+  },
+  "homepage": "https://github.com/quoctinhstudy1911-crypto/dermify-server#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mongoose": "^9.2.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
