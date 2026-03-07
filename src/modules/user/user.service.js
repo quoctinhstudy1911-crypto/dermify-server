@@ -1,7 +1,21 @@
-const repo = require("./user.repository");
+const User = require("./user.model");
 
-exports.createUser = (data) => repo.create(data);
-exports.getUsers = () => repo.findAll();
-exports.getUser = (id) => repo.findById(id);
-exports.updateUser = (id, data) => repo.update(id, data);
-exports.deleteUser = (id) => repo.delete(id);
+exports.createUser = async (data) => {
+  return await User.create(data);
+};
+
+exports.getUsers = async () => {
+  return await User.find();
+};
+
+exports.getUser = async (id) => {
+  return await User.findById(id);
+};
+
+exports.updateUser = async (id, data) => {
+  return await User.findByIdAndUpdate(id, data, { new: true });
+};
+
+exports.deleteUser = async (id) => {
+  return await User.findByIdAndDelete(id);
+};
