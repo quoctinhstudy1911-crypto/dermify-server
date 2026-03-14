@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/users", userRoutes);
+app.use("/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Dermify API Running...");
