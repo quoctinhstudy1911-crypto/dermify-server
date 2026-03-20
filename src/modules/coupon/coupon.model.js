@@ -24,7 +24,8 @@ const couponSchema = new mongoose.Schema(
 
     minOrderValue: {
       type: Number,
-      default: 0
+      default: 0,
+      min: 0
     },
 
     maxDiscount: Number,
@@ -42,19 +43,14 @@ const couponSchema = new mongoose.Schema(
     startDate: Date,
     endDate: Date,
 
-    status: {
+     status: {
       type: String,
-      enum: ["active", "expired"],
+      enum: ["active", "hidden"],
       default: "active"
     }
   },
   { timestamps: true }
 );
-
-/**
- * INDEX
- */
-couponSchema.index({ code: 1 }, { unique: true });
 
 /**
  * CLEAN JSON

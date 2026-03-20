@@ -10,7 +10,10 @@ const orderSchema = new mongoose.Schema(
 
     items: [
       {
-        productId: mongoose.Schema.Types.ObjectId,
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product"
+        },
 
         name: {
           type: String,
@@ -21,7 +24,8 @@ const orderSchema = new mongoose.Schema(
 
         price: {
           type: Number,
-          required: true
+          required: true,
+          min: 0
         },
 
         quantity: {
@@ -32,7 +36,8 @@ const orderSchema = new mongoose.Schema(
 
         subtotal: {
           type: Number,
-          required: true
+          required: true,
+          min: 0
         }
       }
     ],
@@ -76,7 +81,8 @@ const orderSchema = new mongoose.Schema(
 
     totalPrice: {
       type: Number,
-      required: true
+      required: true,
+      min: 0
     }
   },
   { timestamps: true }

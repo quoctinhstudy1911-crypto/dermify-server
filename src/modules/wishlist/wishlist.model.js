@@ -27,10 +27,6 @@ const wishlistSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * INDEX
- */
-wishlistSchema.index({ userId: 1 });
 
 /**
  * CLEAN JSON

@@ -25,9 +25,10 @@ const categorySchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-categorySchema.pre("save", function(next) {
-  this.slug = this.name.toLowerCase().replace(/\s+/g, "-");
-  next();
+categorySchema.pre("save", async function () {
+  if (this.isModified("name")) {
+    this.slug = this.name.toLowerCase().replace(/\s+/g, "-");
+  }
 });
 
 module.exports = mongoose.model("Category", categorySchema);

@@ -22,9 +22,9 @@ const reviewSchema = new mongoose.Schema({
     max: 5
   },
 
-  comment: String,
+ comment: { type: String, trim: true },
 
-  images: [{ type: String }],
+  images: { type: [String], default: [] },
 
   isEdited: { type: Boolean, default: false },
 
