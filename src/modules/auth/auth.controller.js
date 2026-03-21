@@ -1,5 +1,6 @@
 const authService = require("./auth.service");
 
+// Xử lý đăng nhập cho admin và customer
 const login = async (req, res, next) => {
   try {
     const result = await authService.login(req.body);

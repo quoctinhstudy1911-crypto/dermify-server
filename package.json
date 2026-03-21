@@ -4,8 +4,15 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+   "dev": "nodemon server.js",
+  "start": "node server.js",
+  "prod": "cross-env NODE_ENV=production node server.js",
+
+  "seed": "cross-env SEED=true SEED_TYPE=all node server.js",
+  "seed:admin": "cross-env SEED=true SEED_TYPE=admin node server.js",
+  "seed:staff": "cross-env SEED=true SEED_TYPE=staff node server.js",
+  "seed:category": "cross-env SEED=true SEED_TYPE=category node server.js",
+  "seed:product": "cross-env SEED=true SEED_TYPE=product node server.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +30,7 @@
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.3.1",
     "express": "^4.22.1",
     "jsonwebtoken": "^9.0.3",

@@ -6,6 +6,7 @@ const authMiddleware = require("../../middleware/authMiddleware");
 const requireRole = require("../../middleware/requireRole");
 const { validateCreateStaff } = require("./staff.validation");
 
+// Tất cả route trong staff.routes.js đều yêu cầu xác thực JWT và role admin hoặc super_admin
 router.post(
   "/",
   authMiddleware,

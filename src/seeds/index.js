@@ -4,12 +4,50 @@ const seedCategory = require("./category.seed");
 const seedProduct = require("./product.seed");
 
 const seedAll = async () => {
-  await seedSuperAdmin();
-  await seedStaff();
-  await seedCategory();
-  await seedProduct();
+  const type = process.env.SEED_TYPE || "all";
 
-  console.log("Seed done");
+  console.log(`🌱 Seeding type: ${type}`);
+
+  try {
+    switch (type) {
+      case "admin":
+        console.log("👉 Seeding Super Admin...");
+        await seedSuperAdmin();
+        break;
+
+      case "staff":
+        console.log("👉 Seeding Staff...");
+        await seedStaff();
+        break;
+
+      case "category":
+        console.log("👉 Seeding Category...");
+        await seedCategory();
+        break;
+
+      case "product":
+        console.log("👉 Seeding Product...");
+        await seedProduct();
+        break;
+
+      case "all":
+        console.log("👉 Seeding ALL...");
+        await seedSuperAdmin();
+        await seedStaff();
+        await seedCategory();
+        await seedProduct();
+        break;
+
+      default:
+        console.log("❌ Invalid SEED_TYPE");
+        return;
+    }
+
+    console.log("✅ Seed completed successfully");
+  } catch (error) {
+    console.error("❌ Seed error:", error);
+    throw error;
+  }
 };
 
 module.exports = seedAll;
