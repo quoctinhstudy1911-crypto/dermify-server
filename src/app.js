@@ -6,7 +6,7 @@ const userRoutes = require("./modules/user/user.routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const staffRoutes = require("./modules/staff/staff.routes");
 const customerRoutes = require("./modules/customer/customer.routes");
-
+const productRoutes = require("./modules/product/product.routes");
 
 // MIDDLEWARE
 const errorHandler = require("./middleware/errorHandler");
@@ -28,6 +28,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/customer", customerRoutes);
+app.use("/api/products", productRoutes);
 
 // ================== TEST ROUTE ==================
 app.get("/", (req, res) => {
