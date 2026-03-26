@@ -7,11 +7,13 @@ const authRoutes = require("./modules/auth/auth.routes");
 const staffRoutes = require("./modules/staff/staff.routes");
 const customerRoutes = require("./modules/customer/customer.routes");
 const productRoutes = require("./modules/product/product.routes");
+const categoryRoutes = require("./modules/category/category.routes");
 
 // MIDDLEWARE
 const errorHandler = require("./middleware/errorHandler");
 const authMiddleware = require("./middleware/authMiddleware");
 const requireRole = require("./middleware/requireRole");
+
 
 const app = express();
 
@@ -29,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // ================== TEST ROUTE ==================
 app.get("/", (req, res) => {
