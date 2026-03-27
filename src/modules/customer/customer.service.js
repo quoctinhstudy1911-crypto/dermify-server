@@ -43,6 +43,22 @@ const updateProfile = async (accountId, data) => {
 };
 
 /**
+ * GET ADDRESSES
+ */
+const getAddresses = async (accountId) => {
+  const customer = await findCustomer(accountId);
+   // Trường hợp không tìm thấy customer
+   if(!customer)
+   {
+    const err = new Error("Customer not found");
+    err.status = 404;
+    throw err;
+   }
+   // Trả về mảng địa chỉ, nếu không có thì trả về mảng rỗng
+    return customer.addresses || [];
+}
+
+/**
  * ADD ADDRESS
  */
 const addAddress = async (accountId, data) => {
@@ -171,6 +187,7 @@ module.exports = {
   getProfile,
   updateProfile,
   addAddress,
+  getAddresses,
   updateAddress,
   deleteAddress,
   setDefaultAddress,

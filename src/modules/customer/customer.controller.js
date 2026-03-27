@@ -31,6 +31,21 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
+const getAddresses = async (req, res, next) => {
+  try {
+
+    const result = await customerService.getAddresses(req.user.id);
+
+    res.json({
+      success: true,
+      data: result
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 const addAddress = async (req, res, next) => {
   try {
     const result = await customerService.addAddress(req.user.id, req.body);
@@ -106,6 +121,7 @@ module.exports = {
   getProfile,
   updateProfile,
   addAddress,
+  getAddresses,
   updateAddress,
   deleteAddress,
   setDefaultAddress,
