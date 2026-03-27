@@ -10,6 +10,7 @@ const uploadRoutes = require("./modules/upload/upload.routes");
 const productRoutes = require("./modules/product/product.routes");
 const categoryRoutes = require("./modules/category/category.routes");
 const cartRoutes = require("./modules/cart/cart.routes");
+const reviewRoutes = require("./modules/review/review.routes");
 
 
 // MIDDLEWARE
@@ -36,7 +37,7 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
-
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/cart", cartRoutes);
 
 // ================== TEST ROUTE ==================
