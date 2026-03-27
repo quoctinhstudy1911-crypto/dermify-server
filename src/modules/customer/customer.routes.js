@@ -9,6 +9,8 @@ router.get("/profile", authMiddleware, customerController.getProfile);
 
 router.put("/profile", authMiddleware, customerController.updateProfile);
 
+router.get("/addresses", authMiddleware, customerController.getAddresses);
+
 router.post("/address", authMiddleware, customerController.addAddress);
 
 router.put("/address/:id", authMiddleware, customerController.updateAddress);
