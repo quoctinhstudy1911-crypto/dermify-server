@@ -9,6 +9,8 @@ const customerRoutes = require("./modules/customer/customer.routes");
 const uploadRoutes = require("./modules/upload/upload.routes");
 const productRoutes = require("./modules/product/product.routes");
 const categoryRoutes = require("./modules/category/category.routes");
+const cartRoutes = require("./modules/cart/cart.routes");
+
 
 // MIDDLEWARE
 const errorHandler = require("./middleware/errorHandler");
@@ -34,6 +36,8 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
+
+app.use("/api/cart", cartRoutes);
 
 // ================== TEST ROUTE ==================
 app.get("/", (req, res) => {
