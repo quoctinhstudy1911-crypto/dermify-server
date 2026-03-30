@@ -1,43 +1,67 @@
 const validateRegister = (req, res, next) => {
   let { email, password, name, phone } = req.body;
 
-  // 1. trim inputs
-  email = email?.trim();
-  name = name?.trim();
-  phone = phone?.trim();
+  // 0. kiểm tra kiểu dữ liệu
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string" ||
+    typeof name !== "string" ||
+    typeof phone !== "string"
+  ) {
+    const err = new Error("Dữ liệu không hợp lệ");
+    err.status = 400;
+    return next(err);
+  }
 
-  // 2. kiểm tra required fields
+  // 1. chuẩn hoá
+  email = email.trim().toLowerCase();
+  password = password.trim();
+  name = name.trim();
+  phone = phone.trim();
+
+  // 2. required
   if (!email || !password || !name || !phone) {
-    const err = new Error("Missing required fields");
+    const err = new Error("Thiếu thông tin bắt buộc");
     err.status = 400;
     return next(err);
   }
 
-  // 3. email format
-  const emailRegex = /^\S+@\S+\.\S+$/;
+  // 3. length limit
+  if (email.length > 255) return next(new Error("Email quá dài"));
+  if (password.length > 100) return next(new Error("Mật khẩu quá dài"));
+  if (name.length > 100) return next(new Error("Tên quá dài"));
+
+  // 4. email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    const err = new Error("Invalid email");
+    const err = new Error("Email không hợp lệ");
     err.status = 400;
     return next(err);
   }
 
-  // 4. password length
-  if (typeof password !== "string" || password.length < 8) {
-    const err = new Error("Password must be at least 8 characters");
+  // 5. password
+  if (password.length < 8) {
+    const err = new Error("Mật khẩu phải có ít nhất 8 ký tự");
     err.status = 400;
     return next(err);
   }
 
-  // 5. phone format (chỉ chứa số và có độ dài từ 9 đến 11)
-  const phoneRegex = /^[0-9]{9,11}$/;
+  // 6. normalize phone
+  if (phone.startsWith("+84")) {
+    phone = "0" + phone.slice(3);
+  }
+
+  // 7. phone format
+  const phoneRegex = /^0[0-9]{9}$/;
   if (!phoneRegex.test(phone)) {
-    const err = new Error("Invalid phone number");
+    const err = new Error("Số điện thoại không hợp lệ");
     err.status = 400;
     return next(err);
   }
 
-  // 6. gắn lại vào req.body sau khi đã trim và validate
+  // 8. assign lại
   req.body.email = email;
+  req.body.password = password;
   req.body.name = name;
   req.body.phone = phone;
 

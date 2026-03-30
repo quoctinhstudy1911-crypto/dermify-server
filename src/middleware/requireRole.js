@@ -1,21 +1,27 @@
-  const requireRole = (...roles) => {
-    return (req, res, next) => {
-      // chưa login
-      if (!req.user) {
-        const err = new Error("Unauthorized");
-        err.status = 401;
-        return next(err);
-      }
+const requireRole = (...roles) => {
+  return (req, res, next) => {
 
-      // không đủ quyền
-      if (!roles.includes(req.user.role)) {
-        const err = new Error("Forbidden");
-        err.status = 403;
-        return next(err);
-      }
+    // 1. chưa login
+    if (!req.user) {
+      const err = new Error("Chưa đăng nhập");
+      err.status = 401;
+      return next(err);
+    }
 
-      next();
-    };
+    // 2. nếu không truyền role → cho qua
+    if (!roles || roles.length === 0) {
+      return next();
+    }
+
+    // 3. check quyền
+    if (!roles.includes(req.user.role)) {
+      const err = new Error("Không có quyền truy cập");
+      err.status = 403;
+      return next(err);
+    }
+
+    next();
   };
+};
 
-  module.exports = requireRole;
+module.exports = requireRole;
