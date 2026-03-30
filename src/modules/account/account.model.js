@@ -8,13 +8,11 @@ const accountSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Invalid email"]
     },
 
     password: {
       type: String,
       required: true,
-      minlength: 8,
       select: false
     },
 
@@ -24,18 +22,24 @@ const accountSchema = new mongoose.Schema(
       default: "customer"
     },
 
+    refreshToken: {
+        type: String,
+        default: null
+    },
+
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+
     status: {
       type: String,
-      enum: ["active", "inactive"],
-      default: "active"
+      enum: ["pending","active", "inactive"],
+      default: "pending"
     },
 
     lastLogin: Date,
 
-    isDeleted: {
-      type: Boolean,
-      default: false
-    }
   },
   { timestamps: true }
 );
