@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const authController = require("./auth.controller");
 const { validateRegister } = require("./auth.validation");
+
+// IMPORT MIDDLEWARE (Sửa đúng đường dẫn: thoát 2 cấp ra src rồi vào middleware)
 const authMiddleware = require("../../middleware/authMiddleware");
 
 // ==========================================
