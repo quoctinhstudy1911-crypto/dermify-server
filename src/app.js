@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 
 // ROUTES ( Thêm module ở đây )
-const userRoutes = require("./modules/user/user.routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const staffRoutes = require("./modules/staff/staff.routes");
 const customerRoutes = require("./modules/customer/customer.routes");
@@ -30,7 +29,6 @@ app.use(express.json());
 
 // ================== ROUTES ==================
 // CỐ ĐỊNH STRUCTURE 
-app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/customer", customerRoutes);
