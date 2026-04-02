@@ -6,12 +6,12 @@ const addToCart = async (customerId, productId, quantity) => {
   // 1. check product tồn tại
   const product = await Product.findById(productId);
   if (!product) {
-    throw new Error("Product not found");
+    throw new Error("Không tìm thấy sản phẩm ");
   }
 
 
   if (product.stock < quantity) {
-    throw new Error(`Insufficient stock. Only ${product.stock} items available`);
+    throw new Error(`Số lượng tồn kho không đủ. Chỉ còn ${product.stock} items available`);
   }
 
   // 2. tìm cart
@@ -34,7 +34,7 @@ const addToCart = async (customerId, productId, quantity) => {
   
     const newQuantity = existingItem.quantity + quantity;
     if (product.stock < newQuantity) {
-      throw new Error(`Insufficient stock. You already have ${existingItem.quantity} in cart, only ${product.stock - existingItem.quantity} more available`);
+      throw new Error(`Số lượng tồn kho không đủ. Bạn đã có ${existingItem.quantity} trong giỏ, chỉ có thể thêm tối đa ${product.stock - existingItem.quantity} sản phẩm`);
     }
     existingItem.quantity += quantity;
   } else {
@@ -65,7 +65,7 @@ const updateCartItem = async (customerId, productId, quantity) => {
   // 1. tìm cart
   const cart = await Cart.findOne({ customerId });
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new Error("Không tìm thấy giỏ hàng");
   }
 
   // 2. tìm item
@@ -74,7 +74,7 @@ const updateCartItem = async (customerId, productId, quantity) => {
   );
 
   if (!item) {
-    throw new Error("Item not found in cart");
+    throw new Error("Không tìm thấy giỏ hàng");
   }
 
  
@@ -90,11 +90,11 @@ const updateCartItem = async (customerId, productId, quantity) => {
   
   const product = await Product.findById(productId);
   if (!product) {
-    throw new Error("Product not found");
+    throw new Error("Không tìm thấy sản phẩm");
   }
   
   if (product.stock < quantity) {
-    throw new Error(`Insufficient stock. Only ${product.stock} items available`);
+    throw new Error(`Số lượng tồn kho không đủ. Chỉ còn ${product.stock} sản phẩm `);
   }
 
   // 3. update quantity
@@ -112,7 +112,7 @@ const removeCartItem = async (customerId, productId) => {
   // 1. tìm cart
   const cart = await Cart.findOne({ customerId });
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new Error("Không tìm thấy giỏ hàng");
   }
 
   // 2. check item tồn tại
@@ -121,7 +121,7 @@ const removeCartItem = async (customerId, productId) => {
   );
 
   if (!itemExists) {
-    throw new Error("Item not found in cart");
+    throw new Error("Sản phẩm không tồn tại trong giỏ hàng");
   }
 
   // 3. remove item
@@ -140,7 +140,7 @@ const clearCart = async (customerId) => {
   // 1. Kiểm tra cart tồn tại
   const cart = await Cart.findOne({ customerId });
   if (!cart) {
-    throw new Error("Cart not found");
+    throw new Error("Không tìm thấy giỏ hàng ");
   }
 
   // 2. Clear all items

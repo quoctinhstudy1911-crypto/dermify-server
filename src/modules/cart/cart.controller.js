@@ -7,7 +7,7 @@ const addToCart = async (req, res) => {
     if (!productId || typeof quantity !== "number" || quantity <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Invalid input"
+        message: "Dữ liệu đầu vào không hợp lệ"
       });
     }
 
@@ -75,7 +75,7 @@ const updateCartItem = async (req, res) => {
     if (!productId || typeof quantity !== "number") {
       return res.status(400).json({
         success: false,
-        message: "Invalid input"
+        message: "Dữ liệu đầu vào không hợp lệ"
       });
     }
 
@@ -132,7 +132,7 @@ const removeCartItem = async (req, res) => {
     if (!productId) {
       return res.status(400).json({
         success: false,
-        message: "productId is required"
+        message: "Thiếu Product ID"
       });
     }
 
@@ -160,7 +160,7 @@ const clearCart = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Cart cleared successfully",
+      message: "Đã xóa toàn bộ giỏ hàng",
       data: cart
     });
 
