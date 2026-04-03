@@ -119,7 +119,10 @@
         }
 
         // LUẬT MỚI: Nếu người xóa KHÔNG PHẢI LÀ ADMIN, VÀ cũng KHÔNG PHẢI CHÍNH CHỦ -> Đuổi về!
-        if (role !== "admin" && review.userId.toString() !== userId?.toString()) {
+        const isAdmin = ["admin", "super_admin"].includes(role);
+
+        // Nếu KHÔNG phải nhóm admin VÀ KHÔNG phải chính chủ -> Đuổi về
+        if (!isAdmin && review.userId.toString() !== userId?.toString()) {
             throw new Error("UNAUTHORIZED_DELETE");
         }
 
