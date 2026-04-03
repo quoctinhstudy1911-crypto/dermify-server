@@ -1,8 +1,6 @@
 const categoryService = require("./category.service");
 
 // Lấy cây danh mục (Danh mục cha - con lồng nhau)
-const categoryService = require("./category.service");
-
 const getCategoryTree = async (req, res, next) => {
   try {
     const tree = await categoryService.getCategoryTree();
