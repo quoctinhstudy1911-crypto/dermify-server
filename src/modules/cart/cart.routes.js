@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
-
 const cartController = require("./cart.controller");
 const auth = require("../../middleware/authMiddleware");
 
-// Add product to cart
+// BỘ ROUTES /api/cart
 router.post("/add", auth, cartController.addToCart);
 router.get("/", auth, cartController.getCart);
 router.put("/update", auth, cartController.updateCartItem);

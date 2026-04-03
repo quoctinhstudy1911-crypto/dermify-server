@@ -6,33 +6,7 @@ const Account = require("../account/account.model");
 const Customer = require("../customer/customer.model");
 const sendEmail = require("../../utils/sendEmail");
 
-// Email template
-const verificationEmailTemplate = (verifyUrl) => {
-  return `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
-      <div style="background-color: #000; padding: 20px; text-align: center;">
-        <h1 style="color: #fff; margin: 0; letter-spacing: 2px;">DERMIFY</h1>
-      </div>
-      <div style="padding: 40px; color: #333; line-height: 1.6;">
-        <h2 style="color: #000;">Xác thực tài khoản của bạn</h2>
-        <p>Chào mừng bạn đến với <b>Dermify</b>! Chúng tôi rất vui khi bạn đồng hành cùng cộng đồng chăm sóc da của chúng tôi.</p>
-        <p>Vui lòng nhấn vào nút bên dưới để hoàn tất quá trình đăng ký và kích hoạt tài khoản:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${verifyUrl}" style="background-color: #000; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-            Xác thực Email ngay
-          </a>
-        </div>
-        <p style="font-size: 0.9em; color: #666;">Link này sẽ hết hạn trong vòng 24 giờ. Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.</p>
-      </div>
-      <div style="background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 0.8em; color: #999;">
-        <p>&copy; 2026 Dermify Project - STU University</p>
-      </div>
-    </div>
-  `;
-};
-/**
- * REGISTER
- */
+  // REGISTER
 const register = async ({ email, password, name, phone }) => {
   // 1. check email tồn tại
   const existing = await Account.findOne({ email });
@@ -78,7 +52,7 @@ const register = async ({ email, password, name, phone }) => {
     // 8. gửi email
     const verifyLink = `${process.env.CLIENT_URL}/verify-email?token=${verifyToken}`;
 
-    // Gửi email bằng template xịn
+    // Gửi email bằng template đã tạo ở trên
     await sendEmail({
       to: email,
       subject: "Xác thực tài khoản Dermify của bạn",
@@ -94,9 +68,31 @@ const register = async ({ email, password, name, phone }) => {
       }
     };
 
-/**
- * VERIFY EMAIL
- */
+  // verification email template
+const verificationEmailTemplate = (verifyUrl) => {
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
+      <div style="background-color: #000; padding: 20px; text-align: center;">
+        <h1 style="color: #fff; margin: 0; letter-spacing: 2px;">DERMIFY</h1>
+      </div>
+      <div style="padding: 40px; color: #333; line-height: 1.6;">
+        <h2 style="color: #000;">Xác thực tài khoản của bạn</h2>
+        <p>Chào mừng bạn đến với <b>Dermify</b>! Chúng tôi rất vui khi bạn đồng hành cùng cộng đồng chăm sóc da của chúng tôi.</p>
+        <p>Vui lòng nhấn vào nút bên dưới để hoàn tất quá trình đăng ký và kích hoạt tài khoản:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verifyUrl}" style="background-color: #000; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+            Xác thực Email ngay
+          </a>
+        </div>
+        <p style="font-size: 0.9em; color: #666;">Link này sẽ hết hạn trong vòng 24 giờ. Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.</p>
+      </div>
+      <div style="background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 0.8em; color: #999;">
+        <p>&copy; 2026 Dermify Project - STU University</p>
+      </div>
+    </div>
+  `;
+};
+    // VERIFY EMAIL
 const verifyEmail = async (token) => {
   let decoded;
 
@@ -124,9 +120,7 @@ const verifyEmail = async (token) => {
   return { message: "Xác thực thành công" };
 };
 
-/**
- * LOGIN (2 TOKEN)
- */
+  // LOGIN
 const login = async ({ email, password }) => {
   email = email.toLowerCase().trim();
 
@@ -189,9 +183,7 @@ const login = async ({ email, password }) => {
   };
 };
 
-/**
- * REFRESH TOKEN
- */
+  // REFRESH TOKEN
 const refreshTokenService = async (token) => {
   if (!token) {
     throw new Error("Thiếu refresh token");
@@ -222,6 +214,7 @@ const refreshTokenService = async (token) => {
   };
 };
 
+  // GET ME
 const getMe = async (userId) => {
   const account = await Account.findById(userId);
 
@@ -235,6 +228,7 @@ const getMe = async (userId) => {
     role: account.role
   };
 };
+  // LOGOUT
 const logout = async (userId) => {
   const account = await Account.findById(userId);
 
@@ -248,6 +242,7 @@ const logout = async (userId) => {
   return { message: "Đăng xuất thành công" };
 };
 
+  // FORGOT PASSWORD email template
 const resetPasswordEmailTemplate = (resetLink) => {
   return `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">

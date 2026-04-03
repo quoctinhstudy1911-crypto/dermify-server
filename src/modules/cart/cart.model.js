@@ -29,9 +29,7 @@ const cartSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * CLEAN JSON
- */
+// Ẩn trường _id và __v khi trả về JSON
 cartSchema.set("toJSON", {
   versionKey: false,
   transform: function (doc, ret) {

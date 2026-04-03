@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-/**
- * ADDRESS SUB-SCHEMA
- */
+// Subdocument schema cho địa chỉ của khách hàng
 const addressSchema = new mongoose.Schema(
   {
     fullName: {
@@ -30,9 +28,7 @@ const addressSchema = new mongoose.Schema(
   { _id: true } // mỗi address có _id riêng (quan trọng để update/xóa)
 );
 
-/**
- * CUSTOMER SCHEMA
- */
+// Schema chính cho Customer
 const customerSchema = new mongoose.Schema(
   {
     accountId: {
@@ -83,20 +79,14 @@ const customerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-/**
- * HELPER 
- * chỉ hỗ trợ set default trong memory
- */
+// Instance method để set địa chỉ mặc định
 customerSchema.methods.setDefaultAddress = function (addressId) {
   this.addresses.forEach((addr) => {
     addr.isDefault = addr._id.toString() === addressId.toString();
   });
 };
 
-/**
- * CLEAN JSON
- */
+// Ẩn trường _id và __v khi trả về JSON
 customerSchema.set("toJSON", {
   versionKey: false,
   transform: function (doc, ret) {

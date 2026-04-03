@@ -1,5 +1,6 @@
 const cloudinary = require("cloudinary").v2;
 
+// Cấu hình Cloudinary với thông tin từ biến môi trường
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.CLOUD_API_KEY,

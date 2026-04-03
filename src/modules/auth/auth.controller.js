@@ -1,8 +1,6 @@
 const authService = require("./auth.service");
 
-/**
- * LOGIN
- */
+  // LOGIN
 const login = async (req, res, next) => {
   try {
     const data = await authService.login(req.body);
@@ -17,9 +15,7 @@ const login = async (req, res, next) => {
   }
 };
 
-/**
- * REGISTER
- */
+ // REGISTER
 const register = async (req, res, next) => {
   try {
     const data = await authService.register(req.body);
@@ -34,9 +30,7 @@ const register = async (req, res, next) => {
   }
 };
 
-/**
- * VERIFY EMAIL
- */
+  // VERIFY EMAIL
 const verifyEmail = async (req, res, next) => {
   try {
     const { token } = req.query;
@@ -53,9 +47,7 @@ const verifyEmail = async (req, res, next) => {
   }
 };
 
-/**
- * REFRESH TOKEN
- */
+  // REFRESH TOKEN
 const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -97,9 +89,8 @@ const logout = async (req, res, next) => {
     next(err);
   }
 };
-/**
- * FORGOT PASSWORD
- */
+
+  //  FORGOT PASSWORD
 const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -116,9 +107,7 @@ const forgotPassword = async (req, res, next) => {
   }
 };
 
-/**
- * RESET PASSWORD
- */
+  //  RESET PASSWORD
 const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;

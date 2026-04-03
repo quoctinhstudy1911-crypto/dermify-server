@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const categoryController = require("./category.controller");
-
-// Giả định bạn đã có authMiddleware
 const authMiddleware = require("../../middleware/authMiddleware"); 
 const requireRole = require("../../middleware/requireRole");
 
 // PUBLIC APIS
 // LẤY DANH SÁCH DANH MỤC (PUBLIC)
 router.get("/", categoryController.getCategories);
+router.get("/tree", categoryController.getCategoryTree);
 //  XEM CHI TIẾT DANH MỤC (Public)
 router.get("/:slug", categoryController.getCategoryDetail);
 

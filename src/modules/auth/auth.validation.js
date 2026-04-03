@@ -1,3 +1,5 @@
+
+// Validation cho route /register
 const validateRegister = (req, res, next) => {
   let { email, password, name, phone } = req.body;
 

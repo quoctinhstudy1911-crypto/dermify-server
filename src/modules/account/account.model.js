@@ -44,16 +44,14 @@ const accountSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * CLEAN JSON
- */
-accountSchema.set("toJSON", {
-  versionKey: false,
-  transform: function (doc, ret) {
-    ret.id = ret._id;
-    delete ret._id;
-    delete ret.password;
-  }
-});
+  // Ẩn trường _id, __v và password khi trả về JSON
+  accountSchema.set("toJSON", {
+    versionKey: false,
+    transform: function (doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.password;
+    }
+  });
 
 module.exports = mongoose.model("Account", accountSchema);
