@@ -1,5 +1,6 @@
 const cartService = require("./cart.service");
 
+// Add to cart
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
@@ -38,9 +39,6 @@ const addToCart = async (req, res) => {
       });
     }
     
-    // Log lỗi để debug (tùy chọn)
-    console.error("Add to cart error:", err);
-    
     return res.status(400).json({
       success: false,
       message: err.message
@@ -48,8 +46,7 @@ const addToCart = async (req, res) => {
   }
 };
 
-// CART
-
+// Get cart
 const getCart = async (req, res) => {
   try {
     const cart = await cartService.getCart(req.user.id);
@@ -122,9 +119,7 @@ const updateCartItem = async (req, res) => {
   }
 };
 
-
-
-
+// Remove cart item
 const removeCartItem = async (req, res) => {
   try {
     const { productId } = req.params;
@@ -154,6 +149,7 @@ const removeCartItem = async (req, res) => {
   }
 };
 
+// Clear cart
 const clearCart = async (req, res) => {
   try {
     const cart = await cartService.clearCart(req.user.id);

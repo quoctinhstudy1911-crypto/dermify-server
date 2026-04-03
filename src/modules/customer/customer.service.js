@@ -1,9 +1,7 @@
 const Customer = require("./customer.model");
 const cloudinary = require("../../config/cloudinary");
 
-/**
- * HELPER: find customer
- */
+// Hàm tìm kiếm customer theo accountId, dùng chung cho nhiều chức năng
 const findCustomer = async (accountId) => {
   const customer = await Customer.findOne({ accountId });
 
@@ -16,17 +14,13 @@ const findCustomer = async (accountId) => {
   return customer;
 };
 
-/**
- * GET PROFILE
- */
+// GET PROFILE
 const getProfile = async (accountId) => {
   const customer = await findCustomer(accountId);
   return customer;
 };
 
-/**
- * UPDATE PROFILE
- */
+// UPDATE PROFILE
 const updateProfile = async (accountId, data) => {
   const customer = await findCustomer(accountId);
 
@@ -42,9 +36,7 @@ const updateProfile = async (accountId, data) => {
   return customer;
 };
 
-/**
- * GET ADDRESSES
- */
+// GET ADDRESSES
 const getAddresses = async (accountId) => {
   const customer = await findCustomer(accountId);
    // Trường hợp không tìm thấy customer
@@ -58,9 +50,7 @@ const getAddresses = async (accountId) => {
     return customer.addresses || [];
 }
 
-/**
- * ADD ADDRESS
- */
+// ADD ADDRESS
 const addAddress = async (accountId, data) => {
   const customer = await findCustomer(accountId);
 
@@ -80,9 +70,7 @@ const addAddress = async (accountId, data) => {
   return customer;
 };
 
-/**
- * UPDATE ADDRESS
- */
+// UPDATE ADDRESS
 const updateAddress = async (accountId, addressId, data) => {
   const customer = await findCustomer(accountId);
 
@@ -109,9 +97,7 @@ const updateAddress = async (accountId, addressId, data) => {
   return customer;
 };
 
-/**
- * DELETE ADDRESS
- */
+// DELETE ADDRESS
 const deleteAddress = async (accountId, addressId) => {
   const customer = await findCustomer(accountId);
 
@@ -125,7 +111,6 @@ const deleteAddress = async (accountId, addressId) => {
 
   address.deleteOne();
 
-  // 🔥 FIX: đảm bảo luôn có default nếu còn address
   if (customer.addresses.length > 1) {
     const hasDefault = customer.addresses.some(addr => addr.isDefault);
 
@@ -138,9 +123,7 @@ const deleteAddress = async (accountId, addressId) => {
   return customer;
 };
 
-/**
- * SET DEFAULT ADDRESS
- */
+// SET DEFAULT ADDRESS
 const setDefaultAddress = async (accountId, addressId) => {
   const customer = await findCustomer(accountId);
 
@@ -161,9 +144,7 @@ const setDefaultAddress = async (accountId, addressId) => {
   return customer;
 };
 
-/**
- * UPDATE AVATAR
- */
+// UPLOAD AVATAR
 const updateAvatar = async (accountId, file) => {
   if (!file) {
     const err = new Error("No file uploaded");

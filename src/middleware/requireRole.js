@@ -8,7 +8,7 @@ const requireRole = (...roles) => {
       return next(err);
     }
 
-    // 2. nếu không truyền role → cho qua
+    // 2. không truyền role nào thì mặc định cho qua
     if (!roles || roles.length === 0) {
       return next();
     }

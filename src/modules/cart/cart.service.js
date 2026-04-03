@@ -1,6 +1,7 @@
 const Cart = require("./cart.model");
 const Product = require("../product/product.model");
 
+// ADD TO CART
 const addToCart = async (customerId, productId, quantity) => {
 
   // 1. check product tồn tại
@@ -59,7 +60,7 @@ const getCart = async (customerId) => {
   return cart;
 };
 
-// ================= UPDATE QUANTITY =================
+// UPDATE CART
 const updateCartItem = async (customerId, productId, quantity) => {
 
   // 1. tìm cart
@@ -106,7 +107,7 @@ const updateCartItem = async (customerId, productId, quantity) => {
   return cart;
 };
 
-// ================= REMOVE ITEM =================
+// REMOVE CART ITEM
 const removeCartItem = async (customerId, productId) => {
 
   // 1. tìm cart
@@ -135,7 +136,7 @@ const removeCartItem = async (customerId, productId) => {
   return cart;
 };
 
-// ================= CLEAR CART =================
+// CLEAR CART
 const clearCart = async (customerId) => {
   // 1. Kiểm tra cart tồn tại
   const cart = await Cart.findOne({ customerId });

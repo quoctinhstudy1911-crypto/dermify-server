@@ -1,5 +1,18 @@
 const categoryService = require("./category.service");
 
+// Lấy cây danh mục (Danh mục cha - con lồng nhau)
+const categoryService = require("./category.service");
+
+const getCategoryTree = async (req, res, next) => {
+  try {
+    const tree = await categoryService.getCategoryTree();
+
+    res.status(200).json(tree);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // [GET] /api/categories
 const getCategories = async (req, res) => {
     try {
@@ -18,9 +31,7 @@ const getCategories = async (req, res) => {
 };
 
 
-/**
- * Lấy chi tiết danh mục theo Slug
- */
+// [GET] /api/categories/:slug
 const getCategoryDetail = async (req, res) => {
     try {
         const { slug } = req.params;
@@ -45,7 +56,7 @@ const getCategoryDetail = async (req, res) => {
     }
 };
 
-
+// [POST] /api/categories
 const createCategory = async (req, res) => {
     try {
         const { name } = req.body;
@@ -83,6 +94,7 @@ const createCategory = async (req, res) => {
     }
 };
 
+// [PUT] /api/categories/:id
 const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
@@ -166,12 +178,12 @@ const deleteCategory = async (req, res) => {
     }
 };
 
-
 module.exports = {
      getCategories,
      getCategoryDetail,
      createCategory,
      updateCategory,
-     deleteCategory
+     deleteCategory,
+     getCategoryTree
      
      };

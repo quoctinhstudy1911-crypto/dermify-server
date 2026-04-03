@@ -2,12 +2,10 @@ const express = require("express");
 const router = express.Router();
 const authController = require("./auth.controller");
 const { validateRegister } = require("./auth.validation");
-
-// IMPORT MIDDLEWARE (Sửa đúng đường dẫn: thoát 2 cấp ra src rồi vào middleware)
 const authMiddleware = require("../../middleware/authMiddleware");
 
 // ==========================================
-// PUBLIC ROUTES (Ai cũng có thể truy cập)
+// PUBLIC ROUTES (Ai cũng có thể vào được - Không cần token)
 // ==========================================
 
 // Đăng ký tài khoản mới

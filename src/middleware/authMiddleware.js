@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const Account = require("../modules/account/account.model");
 
+// Middleware xác thực JWT
 const authMiddleware = async (req, res, next) => {
   try {
     // 1. lấy header

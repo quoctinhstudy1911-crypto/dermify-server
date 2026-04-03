@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
 const Category = require("./category.model"); // Nhớ trỏ đúng đường dẫn tới file model của bạn
 const Product = require("../product/product.model");
-/**
- * Lấy danh sách danh mục theo cấu trúc Cây (Tree)
- */
+
+// Lấy cây danh mục (Danh mục cha - con lồng nhau)
 const getCategoryTree = async () => {
     // 1. Lấy tất cả danh mục chưa bị xóa và đang active
     const categories = await Category.find({ isDeleted: false, status: "active" })
@@ -39,9 +38,7 @@ const getCategoryTree = async () => {
     return tree;
 };
 
-/**
- * Lấy chi tiết danh mục theo Slug
- */
+// Lấy chi tiết danh mục theo Slug
 const getCategoryBySlug = async (slug) => {
     const category = await Category.findOne({ 
         slug: slug, 
@@ -55,9 +52,7 @@ const getCategoryBySlug = async (slug) => {
 };
 
 
-/**
- * Thêm mới danh mục (Tự động tính toán Level và Path)
- */
+// Tạo mới danh mục
 const createCategory = async (categoryData) => {
     const { name, parentId, status } = categoryData;
 
@@ -99,9 +94,7 @@ const createCategory = async (categoryData) => {
     return newCategory;
 };
 
-/**
- * Cập nhật danh mục (Đổi tên, trạng thái - Cấm đổi Cha)
- */
+// Cập nhật danh mục (Chỉ cho phép đổi tên và status, KHÔNG cho đổi parentId qua API này)
 const updateCategoryById = async (categoryId, updateData) => {
     // 1. BẢO VỆ CẤU TRÚC CÂY: Tuyệt đối không cho phép sửa parentId qua API này
     if (updateData.parentId !== undefined) {
@@ -125,9 +118,7 @@ const updateCategoryById = async (categoryId, updateData) => {
     return updatedCategory;
 };
 
-/**
- * Xóa mềm danh mục (Kèm kiểm tra ràng buộc nghiêm ngặt)
- */
+// Xóa danh mục (Soft Delete)
 const deleteCategoryById = async (categoryId) => {
     // DÒ MÌN 1: Kiểm tra xem có danh mục con nào đang bám theo nó không?
     const hasChildren = await Category.exists({ 
@@ -159,7 +150,6 @@ const deleteCategoryById = async (categoryId) => {
 
     return deletedCategory;
 };
-
 
 module.exports = {
      getCategoryTree ,

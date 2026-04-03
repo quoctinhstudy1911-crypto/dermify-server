@@ -1,7 +1,7 @@
 module.exports = (err, req, res, next) => {
   console.error(err); // log lỗi
 
-  // Mongo duplicate key
+  // Lỗi Mongoose duplicate key (ví dụ email đã tồn tại)
   if (err.code === 11000) {
     return res.status(400).json({
       success: false,
@@ -16,7 +16,8 @@ module.exports = (err, req, res, next) => {
       message: "Token không hợp lệ"
     });
   }
-
+  
+  // JWT hết hạn
   if (err.name === "TokenExpiredError") {
     return res.status(401).json({
       success: false,
@@ -24,6 +25,7 @@ module.exports = (err, req, res, next) => {
     });
   }
 
+  // Các lỗi khác
   const status = err.status || 500;
 
   res.status(status).json({

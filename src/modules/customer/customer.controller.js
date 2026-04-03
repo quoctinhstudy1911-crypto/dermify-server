@@ -1,5 +1,6 @@
 const customerService = require("./customer.service");
 
+// Get profile
 const getProfile = async (req, res, next) => {
   try {
     const result = await customerService.getProfile(req.user.id);
@@ -14,6 +15,7 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+// Update profile
 const updateProfile = async (req, res, next) => {
   try {
     const result = await customerService.updateProfile(
@@ -31,6 +33,7 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
+// Get addresses
 const getAddresses = async (req, res, next) => {
   try {
 
@@ -46,6 +49,7 @@ const getAddresses = async (req, res, next) => {
   }
 };
 
+// Add new address
 const addAddress = async (req, res, next) => {
   try {
     const result = await customerService.addAddress(req.user.id, req.body);
@@ -56,6 +60,7 @@ const addAddress = async (req, res, next) => {
   }
 };
 
+// Update address
 const updateAddress = async (req, res, next) => {
   try {
     const result = await customerService.updateAddress(
@@ -70,6 +75,7 @@ const updateAddress = async (req, res, next) => {
   }
 };
 
+// Delete address
 const deleteAddress = async (req, res, next) => {
   try {
     const result = await customerService.deleteAddress(
@@ -83,6 +89,7 @@ const deleteAddress = async (req, res, next) => {
   }
 };
 
+//  Set default address
 const setDefaultAddress = async (req, res, next) => {
   try {
     const result = await customerService.setDefaultAddress(
@@ -96,6 +103,7 @@ const setDefaultAddress = async (req, res, next) => {
   }
 };
 
+// Upload avatar
 const uploadAvatar = async (req, res, next) => {
   try {
     if (!req.file) {

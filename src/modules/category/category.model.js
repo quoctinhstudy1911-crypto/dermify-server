@@ -25,6 +25,7 @@ const categorySchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// pre-save hook để tự động tạo slug và path
 categorySchema.pre("save", async function () {
   if (this.isModified("name")) {
     this.slug = this.name.toLowerCase().replace(/\s+/g, "-");
