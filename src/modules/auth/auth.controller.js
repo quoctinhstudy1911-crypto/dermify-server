@@ -1,20 +1,5 @@
 const authService = require("./auth.service");
 
-  // LOGIN
-const login = async (req, res, next) => {
-  try {
-    const data = await authService.login(req.body);
-
-    res.json({
-      success: true,
-      data
-    });
-
-  } catch (err) {
-    next(err);
-  }
-};
-
  // REGISTER
 const register = async (req, res, next) => {
   try {
@@ -27,6 +12,22 @@ const register = async (req, res, next) => {
 
   } catch (err) {
     next(err);
+  }
+};
+
+// LOGIN
+const login = async (req, res, next) => {
+  try {
+    const data = await authService.login(req.body);
+
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (err) {
+    next(err);
+    console.error(err);
   }
 };
 
@@ -91,19 +92,26 @@ const logout = async (req, res, next) => {
 };
 
   //  FORGOT PASSWORD
-const forgotPassword = async (req, res, next) => {
+const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const data = await authService.forgotPassword(email);
+    await authService.forgotPassword(email);
 
-    res.json({
+    return res.status(200).json({
       success: true,
-      data
+      message: "Nếu email tồn tại, chúng tôi đã gửi hướng dẫn"
     });
 
   } catch (err) {
-    next(err);
+    // Log lỗi chi tiết để dễ dàng debug, bao gồm email đã yêu cầu và thông tin lỗi
+    console.error("Forgot password error:", err);
+    
+    // Trả về thông báo chung để tránh lộ thông tin về email đã đăng ký hay chưa
+    return res.status(200).json({
+      success: true,
+      message: "Nếu email tồn tại, chúng tôi đã gửi hướng dẫn"
+    });
   }
 };
 

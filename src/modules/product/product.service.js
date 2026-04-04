@@ -4,49 +4,81 @@ const Product = require("./product.model");
 // <<<LẤY DANH SÁCH SẢN PHẨM (USER SIDE)>>>
 
 const getProductList = async (queryParams) => {
-    const { page = 1, limit = 10, search, categoryId, minPrice, maxPrice, sort } = queryParams;
+    const { 
+        page = 1, 
+        limit = 8, 
+        search, 
+        categoryId, 
+        minPrice, 
+        maxPrice, 
+        sort 
+    } = queryParams;
 
-    // Filter cơ bản: Không bị xóa và đang active
-    let queryObj = { isDeleted: false, status: "active" };
+    // 1. Khởi tạo query mặc định (Chỉ lấy SP chưa xóa và đang hoạt động)
+    let queryObj = { 
+        isDeleted: false, 
+        status: "active" 
+    };
 
-    // Tìm kiếm Full-text
-    if (search) queryObj.$text = { $search: search };
+    // 2. Tìm kiếm Full-text (Nếu Schema đã đánh index text cho name/brand)
+    if (search) {
+        queryObj.$text = { $search: search };
+    }
 
-    // Lọc theo danh mục
-    if (categoryId) queryObj.categoryId = categoryId;
+    // 3. LOGIC QUAN TRỌNG: Lọc theo danh mục
+    if (categoryId) {
+        // Trường hợp 1: categoryId là mảng [id1, id2...] (Từ logic lấy toàn bộ con)
+        if (Array.isArray(categoryId)) {
+            queryObj.categoryId = { $in: categoryId };
+        } 
+        // Trường hợp 2: categoryId là chuỗi cách nhau bởi dấu phẩy "id1,id2"
+        else if (typeof categoryId === "string" && categoryId.includes(",")) {
+            queryObj.categoryId = { $in: categoryId.split(",") };
+        } 
+        // Trường hợp 3: Một ID duy nhất
+        else {
+            queryObj.categoryId = categoryId;
+        }
+    }
 
-    // Lọc theo khoảng giá
+    // 4. Lọc theo khoảng giá
     if (minPrice || maxPrice) {
         queryObj.price = {};
         if (minPrice) queryObj.price.$gte = Number(minPrice);
         if (maxPrice) queryObj.price.$lte = Number(maxPrice);
     }
 
-    // Xử lý Sort
-    let sortObj = { createdAt: -1 };
+    // 5. Xử lý Sắp xếp (Sort)
+    let sortObj = { createdAt: -1 }; // Mặc định mới nhất lên đầu
     if (sort === "price_asc") sortObj = { price: 1 };
     if (sort === "price_desc") sortObj = { price: -1 };
     if (sort === "rating") sortObj = { ratingAvg: -1 };
+    if (sort === "sold") sortObj = { soldCount: -1 };
 
-    const skip = (Number(page) - 1) * Number(limit);
+    // 6. Tính toán Phân trang
+    const currentPage = Math.max(1, Number(page));
+    const currentLimit = Math.max(1, Number(limit));
+    const skip = (currentPage - 1) * currentLimit;
 
-    // Truy vấn song song để tối ưu performance
+    // 7. Truy vấn Database song song để tăng tốc độ
     const [products, totalProducts] = await Promise.all([
         Product.find(queryObj)
-            .select("name slug price originalPrice images ratingAvg soldCount brand")
+            .select("name slug price originalPrice images ratingAvg soldCount brand stock")
             .sort(sortObj)
-            .limit(Number(limit))
+            .limit(currentLimit)
             .skip(skip)
-            .lean(),
+            .lean(), // Trả về Plain Object giúp tăng performance
         Product.countDocuments(queryObj)
     ]);
 
+    // 8. Trả về cấu trúc dữ liệu để FE dễ bóc tách
     return {
         products,
         pagination: {
             totalProducts,
-            totalPages: Math.ceil(totalProducts / Number(limit)),
-            currentPage: Number(page)
+            totalPages: Math.ceil(totalProducts / currentLimit),
+            currentPage: currentPage,
+            limit: currentLimit
         }
     };
 };

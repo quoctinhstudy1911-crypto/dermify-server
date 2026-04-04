@@ -18,10 +18,6 @@ const getProducts = async (req, res) => {
 };
 
 
-
-
-
-
 //  XEM CHI TIẾT SẢN PHẨM (GET PRODUCT DETAIL)
 
 const getProductDetail = async (req, res) => {

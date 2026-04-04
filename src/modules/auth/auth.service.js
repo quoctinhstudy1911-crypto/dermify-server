@@ -272,12 +272,9 @@ const forgotPassword = async (email) => {
   // 1. Kiểm tra account
   const account = await Account.findOne({ email, isDeleted: false });
 
-  // Bảo mật: Thường ở Production, người ta sẽ không báo "Email không tồn tại" 
-  // để tránh hacker dò tìm email. Nhưng nếu là đồ án thì báo lỗi cho dễ debug.
+  // Nếu không tìm thấy account nào với email đó, chúng ta sẽ không trả về lỗi để tránh lộ thông tin về email đã đăng ký hay chưa. Thay vào đó, sẽ trả về thông báo chung.
   if (!account) {
-    const err = new Error("Không tìm thấy tài khoản với email này");
-    err.status = 404;
-    throw err;
+    return { success: true };
   }
 
   // 2. Tạo Reset Token (Dùng secret riêng hoặc thêm mật khẩu cũ vào payload để token chỉ dùng được 1 lần)
@@ -298,15 +295,11 @@ const forgotPassword = async (email) => {
       html: resetPasswordEmailTemplate(resetLink)
     });
 
-    return { 
-      success: true,
-      message: "Hướng dẫn đặt lại mật khẩu đã được gửi vào email của bạn." 
-    };
   } catch (error) {
-    const err = new Error("Lỗi khi gửi email. Vui lòng thử lại sau.");
-    err.status = 500;
-    throw err;
+    console.error("Lỗi gửi email quên mật khẩu:", error.message);
   }
+  // 5. LUÔN return thành công
+  return { success: true };
 };
 
 const resetPassword = async (token, newPassword) => {

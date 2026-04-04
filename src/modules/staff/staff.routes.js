@@ -23,6 +23,13 @@ router.get(
 );
 
 router.get(
+  "/me",
+  authMiddleware,
+  requireRole("admin", "super_admin"),
+  staffController.getMyStaff
+);
+
+router.get(
   "/:id",
   authMiddleware,
   requireRole("admin", "super_admin"),
