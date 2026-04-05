@@ -84,11 +84,26 @@ const createAdmin = async (req, res, next) => {
   }
 };
 
+// Lấy thông tin nhân viên của chính mình
+const getMyStaff = async (req, res, next) => {
+  try {
+    const result = await staffService.getMyStaff(req.user.id);
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createStaff,
   getAllStaff,
   getStaffById,
   updateStaff,
   deleteStaff,
-  createAdmin
+  createAdmin,
+  getMyStaff
 };

@@ -278,11 +278,28 @@ const createAdmin = async (data) => {
   }
 };
 
+// GET MY STAFF
+const getMyStaff = async (accountId) => {
+  const staff = await Staff.findOne({
+    accountId,
+    isDeleted: false
+  }).populate("accountId");
+
+  if (!staff) {
+    const err = new Error("Staff not found");
+    err.status = 404;
+    throw err;
+  }
+
+  return staff;
+};
+
 module.exports = {
   createStaff,
   getAllStaff,
   getStaffById,
   deleteStaff,
   updateStaff,
-  createAdmin
+  createAdmin,
+  getMyStaff
 };
