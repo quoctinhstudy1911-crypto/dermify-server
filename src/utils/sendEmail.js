@@ -1,27 +1,25 @@
 const nodemailer = require("nodemailer");
 
-// Tạo transporter với cấu hình ép buộc IPv4 và tăng thời gian chờ
+// Sử dụng Port 587 (STARTTLS) vì Port 465 thường bị các nhà cung cấp như Render chặn để chống spam
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // Chạy trên port 465 bắt buộc secure: true
+  port: 587,
+  secure: false, // Bắt buộc là false cho port 587
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS, // Mã App Password 16 ký tự
   },
-  
-  // 1. ÉP BUỘC DÙNG IPV4 Ở MỨC KẾT NỐI
+  // Ép buộc dùng IPv4 để tránh lỗi ENETUNREACH trước đó
   family: 4, 
-
-  // 2. TĂNG THỜI GIAN CHỜ (Để tránh mạng Render chập chờn gây lỗi ESOCKET)
-  connectionTimeout: 20000, // 20 giây
-  greetingTimeout: 20000,
-  socketTimeout: 20000,
-
-  // 3. CẤU HÌNH TLS CHI TIẾT
+  // Tăng thời gian chờ lên mức tối đa
+  connectionTimeout: 30000, // 30 giây
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
   tls: {
-    rejectUnauthorized: false, // Bỏ qua lỗi chứng chỉ không khớp trên server Linux
-    minVersion: "TLSv1.2"      // Ép dùng phiên bản TLS ổn định nhất cho Gmail
+    // Cấu hình TLS để vượt qua các lớp bảo mật của server Linux
+    rejectUnauthorized: false,
+    minVersion: "TLSv1.2",
+    ciphers: 'SSLv3'
   },
 });
 
@@ -40,10 +38,9 @@ const sendEmail = async ({ to, subject, html }) => {
   } catch (error) {
     console.error("❌ SMTP ERROR DETAILS:");
     console.error("- To:", to);
-    console.error("- Code:", error.code);
+    console.error("- Code:", error.code); // Nếu vẫn lỗi, nó sẽ hiện ở đây
     console.error("- Message:", error.message);
     
-    // Nếu vẫn lỗi ENETUNREACH, hãy kiểm tra lại NODE_OPTIONS trên Render Dashboard
     return false;
   }
 };
