@@ -1,7 +1,7 @@
 const authService = require("./auth.service");
 
- // REGISTER
-const register = async (req, res, next) => {
+  // LOGIN
+const login = async (req, res, next) => {
   try {
     const data = await authService.register(req.body);
 
@@ -15,8 +15,8 @@ const register = async (req, res, next) => {
   }
 };
 
-// LOGIN
-const login = async (req, res, next) => {
+ // REGISTER
+const register = async (req, res, next) => {
   try {
     const data = await authService.login(req.body);
 
@@ -92,7 +92,7 @@ const logout = async (req, res, next) => {
 };
 
   //  FORGOT PASSWORD
-const forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
 
