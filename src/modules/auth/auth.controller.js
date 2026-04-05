@@ -1,33 +1,22 @@
 const authService = require("./auth.service");
 
-  // LOGIN
+// LOGIN
 const login = async (req, res, next) => {
   try {
-    const data = await authService.register(req.body);
-
-    res.status(201).json({
-      success: true,
-      data
-    });
-
+    const data = await authService.login(req.body); // Sửa từ register thành login
+    res.json({ success: true, data }); // Login thường trả về 200, không phải 201
   } catch (err) {
     next(err);
   }
 };
 
- // REGISTER
+// REGISTER
 const register = async (req, res, next) => {
   try {
-    const data = await authService.login(req.body);
-
-    res.json({
-      success: true,
-      data
-    });
-
+    const data = await authService.register(req.body); // Sửa từ login thành register
+    res.status(201).json({ success: true, data });
   } catch (err) {
     next(err);
-    console.error(err);
   }
 };
 
