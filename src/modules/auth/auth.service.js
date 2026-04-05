@@ -6,7 +6,7 @@ const Account = require("../account/account.model");
 const Customer = require("../customer/customer.model");
 const sendEmail = require("../../utils/sendEmail");
 
-  // REGISTER
+// REGISTER
 const register = async ({ email, password, name, phone }) => {
   const cleanEmail = email.toLowerCase().trim();
 
@@ -18,7 +18,7 @@ const register = async ({ email, password, name, phone }) => {
     throw err;
   }
 
-  // 2. Hash password & Tạo Token xác thực (Hết hạn sau 1 giờ)
+  // 2. Hash password & Tạo Token
   const hashed = await bcrypt.hash(password, 10);
   const verifyToken = jwt.sign(
     { email: cleanEmail },
@@ -26,12 +26,12 @@ const register = async ({ email, password, name, phone }) => {
     { expiresIn: "1h" }
   );
 
-  // 3. Khởi tạo Transaction (Giao dịch)
+  // 3. Khởi tạo Transaction
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // 4. Tạo Account (Lưu ý: kết quả trả về là một mảng khi dùng session)
+    // 4. Tạo Account
     const createdAccounts = await Account.create([{
       email: cleanEmail,
       password: hashed,
@@ -41,44 +41,54 @@ const register = async ({ email, password, name, phone }) => {
 
     const newAccount = createdAccounts[0];
 
-    // 5. Tạo thông tin Customer liên kết
+    // 5. Tạo thông tin Customer
     await Customer.create([{
       accountId: newAccount._id,
       name: name.trim(),
       phone: phone.trim().replace(/\s/g, "")
     }], { session });
 
-    // 6. Chuẩn bị link xác thực (Xử lý dấu / ở CLIENT_URL)
-    const baseUrl = process.env.CLIENT_URL.replace(/\/$/, "");
+    // --- BƯỚC QUAN TRỌNG: CHỐT DB TRƯỚC KHI GỬI EMAIL ---
+    // 6. Chốt giao dịch ngay lập tức để giải phóng MongoDB
+    await session.commitTransaction();
+    session.endSession(); // Đóng session luôn
+
+    // 7. Chuẩn bị link xác thực
+    const baseUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
     const verifyLink = `${baseUrl}/verify-email?token=${verifyToken}`;
 
-    // 7. GỬI EMAIL (Nếu lỗi ở đây, catch sẽ bắt và abort DB ngay)
+    // 8. GỬI EMAIL (Không để Email làm treo DB nữa)
+    // Mình vẫn dùng await để báo lỗi cho user nếu mail tèo, 
+    // nhưng lúc này DB đã lưu xong nên không sợ lỗi "WriteConflict" nữa.
     const mailResult = await sendEmail({
       to: cleanEmail,
       subject: "Xác thực tài khoản Dermify của bạn",
       html: verificationEmailTemplate(verifyLink)
     });
 
-    // Kiểm tra nếu sendEmail trả về false (do bạn dùng try/catch bên file sendEmail)
     if (mailResult === false) {
-      throw new Error("Dịch vụ email đang gặp sự cố. Vui lòng thử lại sau.");
+      // Nếu mail lỗi, ta báo cho User biết là đăng ký OK nhưng mail gặp sự cố
+      return {
+        success: true,
+        message: "Đăng ký thành công, nhưng dịch vụ gửi mail đang bận. Vui lòng thử lại chức năng gửi lại mã sau."
+      };
     }
-
-    // 8. Chốt giao dịch: Mọi thứ đều ổn
-    await session.commitTransaction();
 
     return {
       success: true,
-      message: "Đăng ký thành công! Một email xác thực đã được gửi đến hộp thư của bạn."
+      message: "Đăng ký thành công! Vui lòng kiểm tra email của bạn."
     };
 
   } catch (err) {
-    // Nếu có bất kỳ lỗi nào (DB hoặc Email), hủy bỏ toàn bộ dữ liệu đã tạo
-    await session.abortTransaction();
+    // Nếu lỗi xảy ra TRƯỚC khi commit (ví dụ lỗi DB), thì mới abort
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     console.error("❌ Register Flow Error:", err.message);
-    throw err; // Đẩy lỗi ra Controller để trả về cho Client
+    throw err; 
   } finally {
-    session.endSession();
+    // Đảm bảo session luôn được đóng
+    if (session) session.endSession();
   }
 };
 
