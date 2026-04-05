@@ -1,29 +1,30 @@
 const nodemailer = require("nodemailer");
 
-// Cấu hình transporter chuyên dụng cho môi trường Cloud/Hosting
+// Tạo transporter với cấu hình ép buộc IPv4 và tăng thời gian chờ
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
-  secure: true, // Sử dụng SSL cho port 465
+  secure: true, // Chạy trên port 465 bắt buộc secure: true
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Đảm bảo đây là App Password 16 ký tự
+    pass: process.env.EMAIL_PASS,
   },
   
-  // --- ĐÂY LÀ PHẦN QUAN TRỌNG ĐỂ FIX LỖI ENETUNREACH ---
-  family: 4, // Ép nodemailer sử dụng IPv4 thay vì IPv6
-  
+  // 1. ÉP BUỘC DÙNG IPV4 Ở MỨC KẾT NỐI
+  family: 4, 
+
+  // 2. TĂNG THỜI GIAN CHỜ (Để tránh mạng Render chập chờn gây lỗi ESOCKET)
+  connectionTimeout: 20000, // 20 giây
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
+
+  // 3. CẤU HÌNH TLS CHI TIẾT
   tls: {
-    // Giúp tránh lỗi chứng chỉ (certificate) trên một số server Linux
-    rejectUnauthorized: false, 
+    rejectUnauthorized: false, // Bỏ qua lỗi chứng chỉ không khớp trên server Linux
+    minVersion: "TLSv1.2"      // Ép dùng phiên bản TLS ổn định nhất cho Gmail
   },
 });
 
-/**
- * Hàm gửi email
- * @param {Object} params - { to, subject, html }
- * @returns {Boolean} - Trả về true nếu thành công, false nếu thất bại
- */
 const sendEmail = async ({ to, subject, html }) => {
   try {
     const info = await transporter.sendMail({
@@ -34,16 +35,15 @@ const sendEmail = async ({ to, subject, html }) => {
     });
 
     console.log(`✅ Email sent successfully to: ${to}`);
-    // Bạn có thể log thêm messageId để kiểm soát: console.log("Message ID:", info.messageId);
     return true;
 
   } catch (error) {
-    // Log lỗi chi tiết để bạn xem trên Render Dashboard -> Logs
     console.error("❌ SMTP ERROR DETAILS:");
     console.error("- To:", to);
-    console.error("- Code:", error.code); // Sẽ hiện ENETUNREACH nếu chưa fix được
+    console.error("- Code:", error.code);
     console.error("- Message:", error.message);
     
+    // Nếu vẫn lỗi ENETUNREACH, hãy kiểm tra lại NODE_OPTIONS trên Render Dashboard
     return false;
   }
 };
