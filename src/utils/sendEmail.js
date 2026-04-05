@@ -1,37 +1,41 @@
-// Sử dụng nodemailer để gửi email, bạn cần cài đặt nó bằng lệnh: npm install nodemailer
 const nodemailer = require("nodemailer");
 
-// Tạo transporter để cấu hình dịch vụ email, ở đây sử dụng Gmail. Bạn cần cung cấp thông tin đăng nhập email của mình qua biến môi trường.
+// Cấu hình transporter linh hoạt hơn cho môi trường Production
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // Sử dụng SSL cho port 465
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS, // Đảm bảo đây là App Password 16 ký tự
+  },
+  // Bổ sung cấu hình TLS để tránh bị chặn trên môi trường Server (Render/Linux)
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
-//  Hàm gửi email, nhận vào đối tượng chứa địa chỉ người nhận, tiêu đề và nội dung email (dưới dạng HTML)
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"Dermify Team" <${process.env.EMAIL_USER}>`,
       to,
       subject,
-      html
+      html,
     });
 
-    console.log(`Email sent to ${to}`);
-    return true;
+    console.log(`✅ Email sent successfully to: ${to}`);
+    return { success: true, messageId: info.messageId };
 
   } catch (error) {
-    // Log lỗi chi tiết để dễ dàng debug, bao gồm địa chỉ người nhận và thông tin lỗi
-    console.error("❌ Email error:", {
-      to,
-      error: error.message
-    });
-
-    // Trả về false nếu có lỗi xảy ra, để các phần khác của ứng dụng có thể xử lý tình huống này (ví dụ: hiển thị thông báo lỗi cho người dùng)
-    return false;
+    // Log lỗi cực kỳ chi tiết để bạn xem trên Render Logs
+    console.error("❌ SMTP ERROR DETAILS:");
+    console.error("- To:", to);
+    console.error("- Error Code:", error.code);
+    console.error("- Error Message:", error.message);
+    
+    // Ném lỗi ra ngoài để Service/Controller biết mà xử lý
+    throw new Error(`Email Service Error: ${error.message}`);
   }
 };
 

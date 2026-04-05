@@ -8,65 +8,79 @@ const sendEmail = require("../../utils/sendEmail");
 
   // REGISTER
 const register = async ({ email, password, name, phone }) => {
-  // 1. check email tồn tại
-  const existing = await Account.findOne({ email });
+  const cleanEmail = email.toLowerCase().trim();
+
+  // 1. Kiểm tra email tồn tại
+  const existing = await Account.findOne({ email: cleanEmail });
   if (existing) {
-    const err = new Error("Email đã tồn tại");
+    const err = new Error("Email này đã được đăng ký. Vui lòng dùng email khác.");
     err.status = 400;
     throw err;
   }
 
-  // 2. hash password
+  // 2. Hash password & Tạo Token xác thực (Hết hạn sau 1 giờ)
   const hashed = await bcrypt.hash(password, 10);
-
-  // 3. tạo verify token
   const verifyToken = jwt.sign(
-    { email },
+    { email: cleanEmail },
     process.env.JWT_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "1h" }
   );
 
-  // 4. transaction
+  // 3. Khởi tạo Transaction (Giao dịch)
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // 5. tạo account
-    const account = await Account.create([{
-      email,
+    // 4. Tạo Account (Lưu ý: kết quả trả về là một mảng khi dùng session)
+    const createdAccounts = await Account.create([{
+      email: cleanEmail,
       password: hashed,
       role: "customer",
       status: "pending"
     }], { session });
 
-    // 6. tạo customer
+    const newAccount = createdAccounts[0];
+
+    // 5. Tạo thông tin Customer liên kết
     await Customer.create([{
-      accountId: account[0]._id,
-      name,
-      phone
+      accountId: newAccount._id,
+      name: name.trim(),
+      phone: phone.trim().replace(/\s/g, "")
     }], { session });
 
-    // 7. commit
-    await session.commitTransaction();
+    // 6. Chuẩn bị link xác thực (Xử lý dấu / ở CLIENT_URL)
+    const baseUrl = process.env.CLIENT_URL.replace(/\/$/, "");
+    const verifyLink = `${baseUrl}/verify-email?token=${verifyToken}`;
 
-    // 8. gửi email
-    const verifyLink = `${process.env.CLIENT_URL}/verify-email?token=${verifyToken}`;
-
-    // Gửi email bằng template đã tạo ở trên
-    await sendEmail({
-      to: email,
+    // 7. GỬI EMAIL (Nếu lỗi ở đây, catch sẽ bắt và abort DB ngay)
+    const mailResult = await sendEmail({
+      to: cleanEmail,
       subject: "Xác thực tài khoản Dermify của bạn",
-      html: verificationEmailTemplate(verifyLink) // Dùng template bạn đã viết ở trên
+      html: verificationEmailTemplate(verifyLink)
     });
 
+    // Kiểm tra nếu sendEmail trả về false (do bạn dùng try/catch bên file sendEmail)
+    if (mailResult === false) {
+      throw new Error("Dịch vụ email đang gặp sự cố. Vui lòng thử lại sau.");
+    }
+
+    // 8. Chốt giao dịch: Mọi thứ đều ổn
+    await session.commitTransaction();
+
     return {
-      message: "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản."
+      success: true,
+      message: "Đăng ký thành công! Một email xác thực đã được gửi đến hộp thư của bạn."
     };
-      } catch (err) {
-        await session.abortTransaction();
-        throw err;
-      }
-    };
+
+  } catch (err) {
+    // Nếu có bất kỳ lỗi nào (DB hoặc Email), hủy bỏ toàn bộ dữ liệu đã tạo
+    await session.abortTransaction();
+    console.error("❌ Register Flow Error:", err.message);
+    throw err; // Đẩy lỗi ra Controller để trả về cho Client
+  } finally {
+    session.endSession();
+  }
+};
 
   // verification email template
 const verificationEmailTemplate = (verifyUrl) => {
