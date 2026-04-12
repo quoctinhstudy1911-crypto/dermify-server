@@ -29,6 +29,13 @@ router.get(
   staffController.getMyStaff
 );
 
+router.put(
+  "/me",
+  authMiddleware,
+  requireRole("staff", "admin", "super_admin"), // Cho phép nhân viên tự cập nhật
+  staffController.updateMyStaff
+);
+
 router.get(
   "/:id",
   authMiddleware,

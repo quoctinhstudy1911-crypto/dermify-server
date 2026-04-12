@@ -106,22 +106,29 @@ const setDefaultAddress = async (req, res, next) => {
 // Upload avatar
 const uploadAvatar = async (req, res, next) => {
   try {
+    // req.file do middleware upload.single("avatar") tạo ra
     if (!req.file) {
-      throw new Error("No file uploaded");
+      return res.status(400).json({ 
+        success: false, 
+        message: "Vui lòng chọn ảnh để tải lên" 
+      });
     }
 
+    // Gọi service xử lý
     const result = await customerService.updateAvatar(
-      req.user.id,
-      req.file
+      req.user.id, // Lấy ID từ authMiddleware
+      req.file     // File binary/temp path
     );
 
+    // Trả về kết quả cho Frontend
     res.json({
       success: true,
+      message: "Cập nhật ảnh đại diện thành công!",
       data: result
     });
 
   } catch (err) {
-    next(err);
+    next(err); // Đẩy lỗi vào errorHandler
   }
 };
 

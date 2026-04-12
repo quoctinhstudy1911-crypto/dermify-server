@@ -1,5 +1,6 @@
 const Customer = require("./customer.model");
 const cloudinary = require("../../config/cloudinary");
+const fs = require("fs");
 
 // Hàm tìm kiếm customer theo accountId, dùng chung cho nhiều chức năng
 const findCustomer = async (accountId) => {
@@ -145,22 +146,37 @@ const setDefaultAddress = async (accountId, addressId) => {
 };
 
 // UPLOAD AVATAR
-const updateAvatar = async (accountId, file) => {
+const updateAvatar = async (accountIdFromToken, file) => {
   if (!file) {
     const err = new Error("No file uploaded");
     err.status = 400;
     throw err;
   }
 
-  const customer = await findCustomer(accountId);
+  // SỬA TẠI ĐÂY: Dùng đúng tên trường 'accountId' như trong Model
+  const customer = await Customer.findOne({ accountId: accountIdFromToken });
 
+  if (!customer) {
+    // Nếu vẫn không thấy, hãy log ra để kiểm tra giá trị ID nhận vào
+    console.log("ID từ token gửi xuống:", accountIdFromToken);
+    const err = new Error("Không tìm thấy khách hàng trong Database");
+    err.status = 404;
+    throw err;
+  }
+
+  // Upload lên Cloudinary
   const result = await cloudinary.uploader.upload(file.path, {
     folder: "dermify/avatar"
   });
 
-  customer.avatar = result.secure_url;
+  // Dọn dẹp file tạm (fs.unlinkSync...)
+  if (fs.existsSync(file.path)) {
+    fs.unlinkSync(file.path);
+  }
 
+  customer.avatar = result.secure_url;
   await customer.save();
+
   return customer;
 };
 
