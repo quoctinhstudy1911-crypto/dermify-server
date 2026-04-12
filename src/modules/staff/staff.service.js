@@ -294,6 +294,26 @@ const getMyStaff = async (accountId) => {
   return staff;
 };
 
+// UPDATE MY STAFF
+const updateMyStaff = async (accountId, data) => {
+  // Tìm staff dựa trên accountId liên kết
+  const staff = await Staff.findOne({ accountId, isDeleted: false });
+
+  if (!staff) {
+    const err = new Error("Không tìm thấy thông tin nhân viên");
+    err.status = 404;
+    throw err;
+  }
+
+  // Chỉ cho phép cập nhật các trường an toàn
+  if (data.name) staff.name = data.name;
+  if (data.phone) staff.phone = data.phone;
+  // Bạn có thể thêm các trường khác nếu Model Staff có (vd: gender, dateOfBirth)
+
+  await staff.save();
+  return staff;
+};
+
 module.exports = {
   createStaff,
   getAllStaff,
@@ -301,5 +321,6 @@ module.exports = {
   deleteStaff,
   updateStaff,
   createAdmin,
-  getMyStaff
+  getMyStaff,
+  updateMyStaff
 };

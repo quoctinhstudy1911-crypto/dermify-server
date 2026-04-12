@@ -98,6 +98,30 @@ const getMyStaff = async (req, res, next) => {
   }
 };
 
+// [PUT] /api/staff/me
+const updateMyStaff = async (req, res, next) => {
+  try {
+    const accountId = req.user.id; // Lấy ID tài khoản đang đăng nhập
+    const updateData = req.body;   // Dữ liệu name, phone từ frontend gửi lên
+
+    const result = await staffService.updateMyStaff(accountId, updateData);
+
+    res.json({
+      success: true,
+      message: "Cập nhật thông tin cá nhân thành công!",
+      data: result
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Đừng quên thêm vào module.exports của controller
+module.exports = {
+  // ... các hàm khác
+  updateMyStaff,
+};
+
 module.exports = {
   createStaff,
   getAllStaff,
@@ -105,5 +129,6 @@ module.exports = {
   updateStaff,
   deleteStaff,
   createAdmin,
-  getMyStaff
+  getMyStaff,
+  updateMyStaff
 };

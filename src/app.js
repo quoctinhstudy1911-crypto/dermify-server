@@ -25,11 +25,12 @@ const app = express();
 // ================== GLOBAL MIDDLEWARE ==================
 // CỐ ĐỊNH
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); 
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
 // ================== ROUTES ==================
-// CỐ ĐỊNH STRUCTURE 
+// DÙNG STRUCTURE API
 app.use("/api/auth", authRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/customer", customerRoutes);
@@ -39,6 +40,17 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+
+// DÙNG STRUCTURE THÔNG THƯỜNG
+app.use("/auth", authRoutes);
+app.use("/staff", staffRoutes);
+app.use("/customer", customerRoutes);
+app.use("/upload", uploadRoutes);
+app.use("/products", productRoutes);
+app.use("/categories", categoryRoutes);
+app.use("/reviews", reviewRoutes);
+app.use("/cart", cartRoutes);
+app.use("/orders", orderRoutes);
 
 // ================== TEST ROUTE ==================
 app.get("/", (req, res) => {

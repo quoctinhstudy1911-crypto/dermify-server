@@ -1,15 +1,13 @@
 const express = require("express");
 const router = express.Router();
-
-// Lùi 2 cấp (../..) để thoát khỏi thư mục upload và modules, chui vào middleware
+const fs = require("fs"); // Thêm để dọn dẹp file tạm
 const upload = require("../../middleware/upload"); 
-
-// Lùi 2 cấp để chui vào config tìm file cloudinary.js (Tên file config của bạn là gì thì sửa lại nhé, giả sử là cloudinary.js)
 const cloudinary = require("../../config/cloudinary"); 
 
 // [POST] /api/upload/images
 router.post("/images", upload.array("images", 5), async (req, res) => {
     try {
+        // Kiểm tra nếu không có file
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -19,20 +17,40 @@ router.post("/images", upload.array("images", 5), async (req, res) => {
 
         const imageUrls = [];
 
+        // Sử dụng for...of để xử lý từng ảnh một cách tuần tự
         for (const file of req.files) {
-            const result = await cloudinary.uploader.upload(file.path, {
-                folder: "ecommerce_products", 
-            });
-            imageUrls.push(result.secure_url);
+            try {
+                const result = await cloudinary.uploader.upload(file.path, {
+                    folder: "ecommerce_products", 
+                });
+                
+                imageUrls.push(result.secure_url);
+
+                // QUAN TRỌNG: Dọn dẹp file tạm sau khi upload thành công
+                if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
+                }
+            } catch (uploadErr) {
+                // Nếu 1 ảnh lỗi, vẫn nên xóa file tạm của ảnh đó để tránh rác server
+                if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+                console.error("Lỗi từng ảnh:", uploadErr);
+            }
         }
 
         return res.status(200).json({
             success: true,
-            message: "Upload ảnh thành công!",
+            message: `Upload thành công ${imageUrls.length} ảnh!`,
             data: imageUrls 
         });
 
     } catch (error) {
+        // Nếu có lỗi tổng thể, cố gắng dọn dẹp tất cả file tạm còn sót lại
+        if (req.files) {
+            req.files.forEach(file => {
+                if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Lỗi upload ảnh: " + error.message
