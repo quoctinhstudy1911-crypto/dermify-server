@@ -5,9 +5,10 @@ const getProfile = async (req, res, next) => {
   try {
     const result = await customerService.getProfile(req.user.id);
 
+    // Ensure toJSON is called
     res.json({
       success: true,
-      data: result
+      data: result.toJSON ? result.toJSON() : result
     });
 
   } catch (err) {
@@ -25,7 +26,7 @@ const updateProfile = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: result
+      data: result.toJSON ? result.toJSON() : result
     });
 
   } catch (err) {
@@ -54,7 +55,7 @@ const addAddress = async (req, res, next) => {
   try {
     const result = await customerService.addAddress(req.user.id, req.body);
 
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
   } catch (err) {
     next(err);
   }
@@ -69,7 +70,7 @@ const updateAddress = async (req, res, next) => {
       req.body
     );
 
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
   } catch (err) {
     next(err);
   }
@@ -83,7 +84,7 @@ const deleteAddress = async (req, res, next) => {
       req.params.id
     );
 
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
   } catch (err) {
     next(err);
   }
@@ -97,7 +98,7 @@ const setDefaultAddress = async (req, res, next) => {
       req.params.id
     );
 
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
   } catch (err) {
     next(err);
   }
@@ -124,7 +125,7 @@ const uploadAvatar = async (req, res, next) => {
     res.json({
       success: true,
       message: "Cập nhật ảnh đại diện thành công!",
-      data: result
+      data: result.toJSON ? result.toJSON() : result
     });
 
   } catch (err) {

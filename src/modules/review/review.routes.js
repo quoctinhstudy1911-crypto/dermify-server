@@ -4,10 +4,7 @@ const reviewController = require("./review.controller");
 const authMiddleware = require("../../middleware/authMiddleware");
 const requireRole = require("../../middleware/requireRole");
 
-// XEM DANH SÁCH ĐÁNH GIÁ CỦA SẢN PHẨM (PUBLIC)
-router.get("/:productId", reviewController.getProductReviews);
-
-// THÊM MỚI ĐÁNH GIÁ (Bắt buộc đăng nhập - Có bảo vệ)
+// THÊM MỚI ĐÁNH GIÁ (Bắt buộc đăng nhập - Có bảo vệ) - PHẢI TRƯỚC GET /:productId
 router.post("/",
      authMiddleware, requireRole("customer"), 
      reviewController.createReview);
@@ -21,4 +18,7 @@ router.put("/:reviewId",
 router.delete("/:reviewId",
      authMiddleware, requireRole("customer", "admin", "super_admin"),
       reviewController.deleteReview);
+
+// XEM DANH SÁCH ĐÁNH GIÁ CỦA SẢN PHẨM (PUBLIC) - PHẢI SAU CÁC STATIC ROUTES
+router.get("/:productId", reviewController.getProductReviews);
 module.exports = router;

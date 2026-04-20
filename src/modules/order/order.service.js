@@ -20,28 +20,44 @@ const createOrder = async (customerId, orderData) => {
   session.startTransaction();
 
   try {
-    // 1. Lấy giỏ hàng
-    const cart = await Cart.findOne({ customerId })
-      .populate("items.productId")
-      .session(session);
+    const isBuyNow = orderData.isBuyNow === true;
 
-    if (!cart || cart.items.length === 0) {
-      throw new Error("Giỏ hàng đang trống");
+    let sourceItems = [];
+
+    if (isBuyNow) {
+      for (const item of orderData.items) {
+        const product = await Product.findById(item.productId).session(session);
+        if (!product) throw new Error("Sản phẩm không tồn tại");
+
+        sourceItems.push({
+          productId: product,
+          quantity: item.quantity,
+        });
+      }
+    } else {
+      const cart = await Cart.findOne({ customerId })
+        .populate("items.productId")
+        .session(session);
+
+      if (!cart || cart.items.length === 0) {
+        throw new Error("Giỏ hàng đang trống");
+      }
+
+      sourceItems = cart.items;
     }
 
-    // 2. Kiểm tra stock và xây dựng order items
     const orderItems = [];
     let subtotal = 0;
 
-    for (const item of cart.items) {
+    for (const item of sourceItems) {
       const product = item.productId;
 
-      if (!product) {
-        throw new Error("Sản phẩm không tồn tại");
-      }
+      if (!product) throw new Error("Sản phẩm không tồn tại");
 
       if (product.stock < item.quantity) {
-        throw new Error(`Sản phẩm ${product.name} chỉ còn ${product.stock} trong kho`);
+        throw new Error(
+          `Sản phẩm ${product.name} chỉ còn ${product.stock} trong kho`
+        );
       }
 
       const itemSubtotal = product.price * item.quantity;
@@ -53,75 +69,74 @@ const createOrder = async (customerId, orderData) => {
         image: product.image || "",
         price: product.price,
         quantity: item.quantity,
-        subtotal: itemSubtotal
+        subtotal: itemSubtotal,
       });
     }
 
-    // 3. Xử lý coupon (tạm bỏ qua)
-    let discountAmount = 0;
-    let couponId = null;
+    const discountAmount = 0;
+    const couponId = null;
 
-    // 4. Tính phí ship
-    const shippingFee = calculateShippingFee(orderData.shippingAddress.province);
+    const shippingFee = calculateShippingFee(
+      orderData.shippingAddress.province
+    );
 
-    // 5. Tính tổng tiền
     const totalPrice = subtotal - discountAmount + shippingFee;
-
-    // 6. Tạo mã đơn hàng
     const orderCode = generateOrderCode();
 
-    // 7. Tạo order
-    const order = await Order.create([{
-      orderCode,
-      customerId,
-      items: orderItems,
-      subtotal,
-      discountAmount,
-      shippingFee,
-      totalPrice,
-      shippingAddress: {
-        fullName: orderData.shippingAddress.fullName,
-        phone: orderData.shippingAddress.phone,
-        email: orderData.shippingAddress.email || "",
-        province: orderData.shippingAddress.province,
-        district: orderData.shippingAddress.district,
-        ward: orderData.shippingAddress.ward || "",
-        street: orderData.shippingAddress.street,
-        note: orderData.shippingAddress.note || ""
-      },
-      paymentMethod: orderData.paymentMethod,
-      paymentStatus: "pending",
-      orderStatus: "pending",
-      couponId,
-      note: orderData.note || ""
-    }], { session });
 
-    // 8. Giảm stock
-    for (const item of cart.items) {
-  const productId = item.productId._id || item.productId;
+    const order = await Order.create(
+      [
+        {
+          orderCode,
+          customerId,
+          items: orderItems,
+          subtotal,
+          discountAmount,
+          shippingFee,
+          totalPrice,
+          shippingAddress: {
+            fullName: orderData.shippingAddress.fullName,
+            phone: orderData.shippingAddress.phone,
+            email: orderData.shippingAddress.email || "",
+            province: orderData.shippingAddress.province,
+            district: orderData.shippingAddress.district,
+            ward: orderData.shippingAddress.ward || "",
+            street: orderData.shippingAddress.street,
+            note: orderData.shippingAddress.note || "",
+          },
+          paymentMethod: orderData.paymentMethod,
+          paymentStatus: "pending",
+          orderStatus: "pending",
+          couponId,
+          note: orderData.note || "",
+        },
+      ],
+      { session }
+    );
 
-  await Product.findByIdAndUpdate(
-    productId,
-    { $inc: { stock: -item.quantity } },
-    { session }
-  );
-}
+    for (const item of orderItems) {
+      await Product.findByIdAndUpdate(
+        item.productId,
+        { $inc: { stock: -item.quantity } },
+        { session }
+      );
+    }
 
-    // 9. Xóa cart
-   await Cart.findOneAndDelete({ customerId },{ session });
+    if (!isBuyNow) {
+      await Cart.findOneAndUpdate(
+        { customerId },
+        { $set: { items: [] } },
+        { session }
+      );
+    }
 
-    // COMMIT TRANSACTION - CHỈ GỌI 1 LẦN
     await session.commitTransaction();
     session.endSession();
 
-    // 10. Trả về order đã populate
-    const populatedOrder = await Order.findById(order[0]._id)
-      .populate("items.productId", "name price image");
+    const createdOrder = await Order.findById(order[0]._id);
 
-    return populatedOrder;
-
+    return createdOrder;
   } catch (error) {
-    // CHỈ ABORT NẾU TRANSACTION VẪN ĐANG HOẠT ĐỘNG
     if (session.inTransaction()) {
       await session.abortTransaction();
     }
@@ -177,13 +192,18 @@ const getMyOrders = async (customerId, page = 1, limit = 10, status = null) => {
 
 
 const getOrderDetail = async (customerId, orderId) => {
-  // Tìm order và populate thông tin
   const order = await Order.findOne({
     _id: orderId,
-    customerId  // Đảm bảo chỉ lấy đơn của chính customer này
-  })
-    .populate("items.productId", "name price image description")
-    //.populate("couponId", "code discountType discountValue");
+    customerId,
+  });
+
+  return order;
+};
+
+const getOrderDetailForAdmin = async (orderId) => {
+  const order = await Order.findById(orderId)
+    .populate("customerId", "fullName name email phone")
+    .populate("items.productId", "name price image");
 
   if (!order) {
     throw new Error("Không tìm thấy đơn hàng");
@@ -209,10 +229,11 @@ const cancelOrder = async (customerId, orderId, reason = "") => {
     if (!order) {
       throw new Error("Không tìm thấy đơn hàng");
     }
-      if (order.orderStatus === "cancelled") {
-   
-    return order;
-  }
+    if (order.orderStatus === "cancelled") {
+      await session.abortTransaction();
+      session.endSession();
+      return order;
+    }
 
     // 2. Kiểm tra trạng thái có thể hủy không
     const cancellableStatuses = ["pending", "confirmed"];
@@ -735,16 +756,10 @@ module.exports = {
   createOrder,
   getMyOrders,
   getOrderDetail,
+  getOrderDetailForAdmin,
   cancelOrder,
   getAllOrders,
   updateOrderStatus ,
  updatePaymentStatus ,
  getOrderStatistics
 };
-
-
-
-
-
-
-

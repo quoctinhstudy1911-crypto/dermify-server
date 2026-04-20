@@ -1,4 +1,5 @@
 const Product = require("./product.model");
+const mongoose = require("mongoose")
 
 
 // <<<LẤY DANH SÁCH SẢN PHẨM (USER SIDE)>>>
@@ -91,13 +92,23 @@ const getProductList = async (queryParams) => {
 //  XEM CHI TIẾT SẢN PHẨM (GET PRODUCT DETAIL)
 
 const getProductDetailBySlug = async (slug) => {
-    const product = await Product.findOne({ 
-        slug: slug, 
-        isDeleted: false, 
-        status: "active" 
-    })
-    .populate("categoryId", "name") // Lấy thêm tên danh mục
-    .lean(); // Tăng tốc độ đọc dữ liệu
+    let product;
+
+    if (mongoose.Types.ObjectId.isValid(slug)) {
+        // nếu là ID
+        product = await Product.findOne({
+            _id: slug,
+            isDeleted: false,
+            status: "active"
+        }).populate("categoryId", "name").lean();
+    } else {
+        // nếu là slug
+        product = await Product.findOne({
+            slug: slug,
+            isDeleted: false,
+            status: "active"
+        }).populate("categoryId", "name").lean();
+    }
 
     return product;
 };

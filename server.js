@@ -29,7 +29,6 @@ const startServer = async () => {
       console.log("✅ Seed completed");
     }
     
-
     // 3. Start server
     app.listen(PORT, () => {
       console.log(`🔥 Server running on port ${PORT}`);

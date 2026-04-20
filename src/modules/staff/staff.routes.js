@@ -6,7 +6,33 @@ const authMiddleware = require("../../middleware/authMiddleware");
 const requireRole = require("../../middleware/requireRole");
 const { validateCreateStaff } = require("./staff.validation");
 
-// Tất cả route trong staff.routes.js đều yêu cầu xác thực JWT và role admin hoặc super_admin
+// ==================== ROUTE STATIC TRƯỚC ROUTE DYNAMIC ====================
+// Tạo Admin - Chỉ super_admin
+router.post(
+  "/create-admin",
+  authMiddleware,
+  requireRole("super_admin"),
+  staffController.createAdmin
+);
+
+// GET /me - Thông tin staff hiện tại
+router.get(
+  "/me",
+  authMiddleware,
+  requireRole("staff", "admin", "super_admin"),
+  staffController.getMyStaff
+);
+
+// UPDATE /me - Cập nhật info của chính mình
+router.put(
+  "/me",
+  authMiddleware,
+  requireRole("staff", "admin", "super_admin"),
+  staffController.updateMyStaff
+);
+
+// ==================== ROUTES DYNAMIC ====================
+// Tạo Staff - Admin và Super_admin
 router.post(
   "/",
   authMiddleware,
@@ -15,6 +41,7 @@ router.post(
   staffController.createStaff
 );
 
+// Lấy tất cả staff
 router.get(
   "/",
   authMiddleware,
@@ -22,20 +49,7 @@ router.get(
   staffController.getAllStaff
 );
 
-router.get(
-  "/me",
-  authMiddleware,
-  requireRole("admin", "super_admin"),
-  staffController.getMyStaff
-);
-
-router.put(
-  "/me",
-  authMiddleware,
-  requireRole("staff", "admin", "super_admin"), // Cho phép nhân viên tự cập nhật
-  staffController.updateMyStaff
-);
-
+// Lấy staff theo ID
 router.get(
   "/:id",
   authMiddleware,
@@ -43,6 +57,7 @@ router.get(
   staffController.getStaffById
 );
 
+// Cập nhật staff
 router.put(
   "/:id",
   authMiddleware,
@@ -50,18 +65,12 @@ router.put(
   staffController.updateStaff
 );
 
+// Xóa staff
 router.delete(
   "/:id",
   authMiddleware,
   requireRole("admin", "super_admin"),
   staffController.deleteStaff
-);
-
-router.post(
-  "/create-admin",
-  authMiddleware,
-  requireRole("super_admin"),
-  staffController.createAdmin
 );
 
 module.exports = router;

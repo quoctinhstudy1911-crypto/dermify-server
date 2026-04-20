@@ -4,14 +4,15 @@ const Staff = require("../modules/staff/staff.model");
 
 const seedStaff = async () => {
   try {
+    // 1. Dữ liệu cần Seed
     const staffData = [
       {
         email: "admin@dermify.com",
         password: "password123",
-        role: "admin", // Quyền hệ thống
+        role: "admin", 
         name: "Trần Quản Lý",
         phone: "0912345678",
-        position: "manager" // Chức vụ trong bảng Staff
+        position: "manager" 
       },
       {
         email: "staff@dermify.com",
@@ -23,39 +24,54 @@ const seedStaff = async () => {
       }
     ];
 
+    console.log("--- Bắt đầu quá trình Seed dữ liệu Staff & Admin ---");
+
     for (const data of staffData) {
-      // 1. Kiểm tra tài khoản (Account) đã tồn tại chưa
-      let account = await Account.findOne({ email: data.email });
-
-      if (!account) {
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-        account = await Account.create({
-          email: data.email,
-          password: hashedPassword,
-          role: data.role,
-          status: "active"
-        });
-        console.log(`+ Đã tạo Account: ${data.email}`);
+      // KIỂM TRA TRƯỚC KHI TẠO (Phòng trường hợp bạn chưa xóa hết)
+      const existingAccount = await Account.findOne({ email: data.email });
+      
+      if (existingAccount) {
+        console.log(`! Account ${data.email} đã tồn tại, bỏ qua bước tạo Account.`);
+        
+        // Nếu đã có Account nhưng chưa có Staff thì tạo bổ sung
+        const existingStaff = await Staff.findOne({ accountId: existingAccount._id });
+        if (!existingStaff) {
+            await Staff.create({
+                accountId: existingAccount._id,
+                name: data.name,
+                phone: data.phone,
+                position: data.position,
+                isDeleted: false,
+                avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=random`
+            });
+            console.log(`  -> Đã bổ sung Profile Staff cho Account có sẵn.`);
+        }
+        continue;
       }
 
-      // 2. Kiểm tra thông tin chi tiết (Staff) đã tồn tại chưa
-      const existingStaff = await Staff.findOne({ accountId: account._id });
+      // 2. TẠO ACCOUNT MỚI
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      const account = await Account.create({
+        email: data.email,
+        password: hashedPassword,
+        role: data.role,
+        status: "active"
+      });
+      console.log(`+ Đã tạo Account: ${data.email}`);
 
-      if (!existingStaff) {
-        await Staff.create({
-          accountId: account._id,
-          name: data.name,
-          phone: data.phone,
-          position: data.position,
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=random`
-        });
-        console.log(`  -> Đã tạo Profile Staff cho: ${data.name}`);
-      } else {
-        console.log(`! Staff ${data.name} đã tồn tại, bỏ qua.`);
-      }
+      // 3. TẠO STAFF MỚI (Nối trực tiếp với Account vừa tạo)
+      await Staff.create({
+        accountId: account._id,
+        name: data.name,
+        phone: data.phone,
+        position: data.position,
+        isDeleted: false, // Quan trọng để hàm getMe không bỏ qua
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=random`
+      });
+      console.log(`  -> Đã tạo Profile Staff cho: ${data.name}`);
     }
 
-    console.log("✅ Hoàn thành Seed Staff & Admin");
+    console.log("✅ Hoàn thành Seed dữ liệu thành công!");
   } catch (error) {
     console.error("❌ Lỗi Seed Staff:", error);
   }

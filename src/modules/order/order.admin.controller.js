@@ -139,11 +139,17 @@ const updateOrderStatus = async (req, res) => {
     }
 
     // 400 - lỗi business logic
-    if (
-      msg.toLowerCase().includes("cannot") ||
-      msg.toLowerCase().includes("must be paid") ||
-      msg.toLowerCase().includes("already")
-    ) {
+    const businessErrors = [
+      "cannot",
+      "must be paid",
+      "already",
+      "không thể",
+      "đơn hàng đã hoàn thành",
+      "thanh toán trước khi giao"
+    ];
+    const isBusinessError = businessErrors.some(err => msg.toLowerCase().includes(err));
+
+    if (isBusinessError) {
       return res.status(400).json({
         success: false,
         message: msg
@@ -224,12 +230,18 @@ const updatePaymentStatus = async (req, res) => {
   }
 
   // 400 - tất cả lỗi business logic
-  if (
-    msg.includes("Cannot change payment status") ||
-    msg.includes("Cannot update payment") ||
-    msg.includes("TransactionId") ||
-    msg.includes("completed")
-  ) {
+      const paymentBusinessErrors = [
+        "cannot change payment status",
+        "cannot update payment",
+        "transactionid",
+        "completed",
+        "không thể",
+        "cần mã giao dịch",
+        "đơn đã hoàn thành"
+      ];
+      const isPaymentBusinessError = paymentBusinessErrors.some(err => msg.toLowerCase().includes(err));
+
+      if (isPaymentBusinessError) {
     return res.status(400).json({
       success: false,
       message: msg
@@ -285,8 +297,48 @@ const getOrderStatistics = async (req, res) => {
   }
 };
 
+/**
+ * Get Order Detail - Admin
+ * GET /api/orders/admin/orders/:orderId
+ */
+const getOrderDetail = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    // Validate orderId
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID không hợp lệ"
+      });
+    }
+
+    const order = await orderService.getOrderDetailForAdmin(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Đơn hàng không tìm thấy"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: order
+    });
+
+  } catch (error) {
+    console.error("Get order detail error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Lỗi hệ thống"
+    });
+  }
+};
+
 module.exports = {
   getAllOrders,
+  getOrderDetail,
   updateOrderStatus,
    updatePaymentStatus,
     getOrderStatistics

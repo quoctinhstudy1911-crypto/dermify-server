@@ -1,27 +1,39 @@
 const bcrypt = require("bcrypt");
 const Account = require("../modules/account/account.model");
+const Staff = require("../modules/staff/staff.model");
 
 const seedSuperAdmin = async () => {
   const email = process.env.SUPER_ADMIN_EMAIL;
   const password = process.env.SUPER_ADMIN_PASSWORD;
 
-  const existing = await Account.findOne({ email });
+  let account = await Account.findOne({ email });
 
-  if (existing) {
+  if (!account) {
+    const hashed = await bcrypt.hash(password, 10);
+
+    account = await Account.create({
+      email,
+      password: hashed,
+      role: "super_admin",
+      status: "active"
+    });
+
+    console.log("Super admin seeded");
+  } else {
     console.log("Super admin already exists");
-    return;
   }
 
-  const hashed = await bcrypt.hash(password, 10);
+  const existingStaff = await Staff.findOne({ accountId: account._id });
 
-  await Account.create({
-    email,
-    password: hashed,
-    role: "super_admin",
-    status: "active"
-  });
-
-  console.log("Super admin seeded");
+  if (!existingStaff) {
+    await Staff.create({
+      accountId: account._id,
+      name: "Super Admin",
+      phone: "0900000000",
+      position: "manager"
+    });
+    console.log("Super admin staff profile seeded");
+  }
 };
 
 module.exports = seedSuperAdmin;
