@@ -1,16 +1,19 @@
 const customerService = require("./customer.service");
 
+// Helper trả data an toàn
+const formatData = (data) => {
+  return data?.toJSON ? data.toJSON() : data;
+};
+
 // Get profile
 const getProfile = async (req, res, next) => {
   try {
     const result = await customerService.getProfile(req.user.id);
 
-    // Ensure toJSON is called
     res.json({
       success: true,
-      data: result.toJSON ? result.toJSON() : result
+      data: formatData(result),
     });
-
   } catch (err) {
     next(err);
   }
@@ -26,9 +29,8 @@ const updateProfile = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: result.toJSON ? result.toJSON() : result
+      data: formatData(result),
     });
-
   } catch (err) {
     next(err);
   }
@@ -37,14 +39,12 @@ const updateProfile = async (req, res, next) => {
 // Get addresses
 const getAddresses = async (req, res, next) => {
   try {
-
     const result = await customerService.getAddresses(req.user.id);
 
     res.json({
       success: true,
-      data: result
+      data: result,
     });
-
   } catch (err) {
     next(err);
   }
@@ -55,7 +55,10 @@ const addAddress = async (req, res, next) => {
   try {
     const result = await customerService.addAddress(req.user.id, req.body);
 
-    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
+    res.json({
+      success: true,
+      data: formatData(result),
+    });
   } catch (err) {
     next(err);
   }
@@ -70,7 +73,10 @@ const updateAddress = async (req, res, next) => {
       req.body
     );
 
-    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
+    res.json({
+      success: true,
+      data: formatData(result),
+    });
   } catch (err) {
     next(err);
   }
@@ -84,13 +90,16 @@ const deleteAddress = async (req, res, next) => {
       req.params.id
     );
 
-    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
+    res.json({
+      success: true,
+      data: formatData(result),
+    });
   } catch (err) {
     next(err);
   }
 };
 
-//  Set default address
+// Set default address
 const setDefaultAddress = async (req, res, next) => {
   try {
     const result = await customerService.setDefaultAddress(
@@ -98,7 +107,10 @@ const setDefaultAddress = async (req, res, next) => {
       req.params.id
     );
 
-    res.json({ success: true, data: result.toJSON ? result.toJSON() : result });
+    res.json({
+      success: true,
+      data: formatData(result),
+    });
   } catch (err) {
     next(err);
   }
@@ -107,29 +119,25 @@ const setDefaultAddress = async (req, res, next) => {
 // Upload avatar
 const uploadAvatar = async (req, res, next) => {
   try {
-    // req.file do middleware upload.single("avatar") tạo ra
     if (!req.file) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Vui lòng chọn ảnh để tải lên" 
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng chọn ảnh để tải lên",
       });
     }
 
-    // Gọi service xử lý
     const result = await customerService.updateAvatar(
-      req.user.id, // Lấy ID từ authMiddleware
-      req.file     // File binary/temp path
+      req.user.id,
+      req.file
     );
 
-    // Trả về kết quả cho Frontend
     res.json({
       success: true,
       message: "Cập nhật ảnh đại diện thành công!",
-      data: result.toJSON ? result.toJSON() : result
+      data: formatData(result),
     });
-
   } catch (err) {
-    next(err); // Đẩy lỗi vào errorHandler
+    next(err);
   }
 };
 
@@ -141,5 +149,5 @@ module.exports = {
   updateAddress,
   deleteAddress,
   setDefaultAddress,
-  uploadAvatar
+  uploadAvatar,
 };

@@ -7,6 +7,7 @@ const requireRole = require("../../middleware/requireRole");
 const { validateCreateStaff } = require("./staff.validation");
 
 // ==================== ROUTE STATIC TRƯỚC ROUTE DYNAMIC ====================
+
 // Tạo Admin - Chỉ super_admin
 router.post(
   "/create-admin",
@@ -32,7 +33,8 @@ router.put(
 );
 
 // ==================== ROUTES DYNAMIC ====================
-// Tạo Staff - Admin và Super_admin
+
+// Tạo Staff
 router.post(
   "/",
   authMiddleware,
