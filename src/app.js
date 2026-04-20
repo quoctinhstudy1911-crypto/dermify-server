@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-// ROUTES ( Thêm module ở đây )
+// ROUTES
 const authRoutes = require("./modules/auth/auth.routes");
 const staffRoutes = require("./modules/staff/staff.routes");
 const customerRoutes = require("./modules/customer/customer.routes");
@@ -11,58 +11,44 @@ const categoryRoutes = require("./modules/category/category.routes");
 const cartRoutes = require("./modules/cart/cart.routes");
 const orderRoutes = require("./modules/order/order.routes");
 const reviewRoutes = require("./modules/review/review.routes");
-
+const userManagementRoutes = require("./modules/user-management/user-management.routes");
 
 // MIDDLEWARE
 const errorHandler = require("./middleware/errorHandler");
-const authMiddleware = require("./middleware/authMiddleware");
-const requireRole = require("./middleware/requireRole");
-
 
 const app = express();
 
-
 // ================== GLOBAL MIDDLEWARE ==================
-// CỐ ĐỊNH
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); 
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // ================== ROUTES ==================
-// DÙNG STRUCTURE API
-app.use("/api/auth", authRoutes);
-app.use("/api/staff", staffRoutes);
-app.use("/api/customer", customerRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/reviews", reviewRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRoutes);
 
-// DÙNG STRUCTURE THÔNG THƯỜNG
-app.use("/auth", authRoutes);
-app.use("/staff", staffRoutes);
-app.use("/customer", customerRoutes);
-app.use("/upload", uploadRoutes);
-app.use("/products", productRoutes);
-app.use("/categories", categoryRoutes);
-app.use("/reviews", reviewRoutes);
-app.use("/cart", cartRoutes);
-app.use("/orders", orderRoutes);
+const routes = [
+  { path: "/auth", route: authRoutes },
+  { path: "/staff", route: staffRoutes },
+  { path: "/customer", route: customerRoutes },
+  { path: "/upload", route: uploadRoutes },
+  { path: "/products", route: productRoutes },
+  { path: "/categories", route: categoryRoutes },
+  { path: "/reviews", route: reviewRoutes },
+  { path: "/cart", route: cartRoutes },
+  { path: "/orders", route: orderRoutes },
+  { path: "/users", route: userManagementRoutes },
+];
+
+routes.forEach(r => {
+  app.use(`/api${r.path}`, r.route);
+  app.use(r.path, r.route);
+});
 
 // ================== TEST ROUTE ==================
 app.get("/", (req, res) => {
   res.send("Dermify API Running...");
 });
 
-
 // ================== ERROR HANDLER ==================
 app.use(errorHandler);
-
-
-
-
 
 module.exports = app;

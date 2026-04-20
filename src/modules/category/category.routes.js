@@ -7,7 +7,10 @@ const requireRole = require("../../middleware/requireRole");
 // PUBLIC APIS
 // LẤY DANH SÁCH DANH MỤC (PUBLIC)
 router.get("/", categoryController.getCategories);
+
+// IMPORTANT: Static routes must come before dynamic :slug route
 router.get("/tree", categoryController.getCategoryTree);
+
 //  XEM CHI TIẾT DANH MỤC (Public)
 router.get("/:slug", categoryController.getCategoryDetail);
 
