@@ -61,9 +61,6 @@ reviewSchema.statics.calcAverageRatings = async function (productId) {
         }
     ]);
 
-    // In ra log để bạn dễ debug khi test
-    console.log("Kết quả tính toán sao: ", stats);
-
     try {
         // Cập nhật kết quả sang bảng Product
         if (stats.length > 0) {

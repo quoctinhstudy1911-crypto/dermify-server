@@ -15,7 +15,7 @@ const requireRole = (...roles) => {
 
     // 3. check quyền
     if (!roles.includes(req.user.role)) {
-      const err = new Error("Không có quyền truy cập");
+      const err = new Error("Bạn không có quyền truy cập tài nguyên này");
       err.status = 403;
       return next(err);
     }

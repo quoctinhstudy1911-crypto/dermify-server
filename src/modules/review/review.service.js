@@ -7,8 +7,8 @@
     const createReview = async (reviewData) => {
         const { productId, userId, rating, comment, images } = reviewData;
 
-        // DÒ MÌN 1: Kiểm tra xem sản phẩm này có tồn tại thật không?
-        const productExists = await Product.findById(productId);
+        // Validate that the product exists and is not deleted.
+        const productExists = await Product.findOne({ _id: productId, isDeleted: false });
         if (!productExists || productExists.isDeleted) {
             throw new Error("PRODUCT_NOT_FOUND");
         }
@@ -24,12 +24,12 @@
             });
 
             await newReview.save();
-            // GẮN NGÒI NỔ: Tính lại sao sau khi TẠO xong
+            // After saving, recalculate the average rating for the product.
             await Review.calcAverageRatings(productId);
             return newReview;
 
         } catch (error) {
-            // BẮT BỆNH LỖI 11000: Model index { userId, productId } unique sẽ quăng lỗi này nếu spam
+            // Handle duplicate key error (code 11000), which occurs if a user tries to review the same product twice.
             if (error.code === 11000) {
                 throw new Error("ALREADY_REVIEWED");
             }

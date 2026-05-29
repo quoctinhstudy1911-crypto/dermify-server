@@ -5,7 +5,7 @@ const Account = require("../modules/account/account.model");
 const authMiddleware = async (req, res, next) => {
   try {
     // 1. lấy header
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization; // Lấy header Authorization từ request (nơi client gửi token lên, định dạng thường là "Bearer
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       const err = new Error("Chưa đăng nhập");
@@ -13,12 +13,17 @@ const authMiddleware = async (req, res, next) => {
       return next(err);
     }
 
-    // 2. lấy token
+    // 2. lấy token ra khỏi header
     const token = authHeader.split(" ")[1];
 
     // 3. verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    if (!decoded.id) {
+    const err = new Error("Token không hợp lệ");
+    err.status = 401;
+    return next(err);
+    }
     // 4. tìm account
     const account = await Account.findById(decoded.id);
 
@@ -49,7 +54,9 @@ const authMiddleware = async (req, res, next) => {
     next();
 
   } catch (err) {
-    next(err); // sẽ vào errorHandler (JWT lỗi tự xử lý luôn)
+      const error = new Error("Token không hợp lệ hoặc đã hết hạn");
+      error.status = 401;
+      next(error);
   }
 };
 

@@ -257,8 +257,6 @@ const cancelOrder = async (customerId, orderId, reason = "") => {
   for (const item of order.items) {
   const productId = item.productId._id || item.productId;
 
-  console.log("Restoring stock:", productId, item.quantity);
-
   await Product.findByIdAndUpdate(
     productId,
     { $inc: { stock: item.quantity } }
@@ -750,6 +748,17 @@ const getOrderStatistics = async (startDate = null, endDate = null) => {
   };
 };
 
+// Viết 1 api để lấy đơn hàng có giá trị cao nhất trong tất cả các đơn hàng không cần xét điều kiện trong tất cả đơn hàng
+const getMostExpensiveOrder = async () => {
+  const order = await Order.findOne({})
+    .sort({ totalPrice: -1 })
+    .populate("items.productId", "name price image");
+    if (!order) {
+    throw new Error("Không tìm thấy đơn hàng nào");
+    }
+    return order;
+};
+
 
 
 module.exports = {
@@ -761,5 +770,6 @@ module.exports = {
   getAllOrders,
   updateOrderStatus ,
  updatePaymentStatus ,
- getOrderStatistics
+ getOrderStatistics,
+ getMostExpensiveOrder
 };

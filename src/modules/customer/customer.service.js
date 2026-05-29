@@ -5,20 +5,18 @@ const fs = require("fs");
 // Hàm tìm kiếm customer theo accountId, dùng chung cho nhiều chức năng
 const findCustomer = async (accountId) => {
   const customer = await Customer.findOne({ accountId });
-
   if (!customer) {
     const err = new Error("Customer not found");
     err.status = 404;
     throw err;
   }
-
   return customer;
 };
 
 // GET PROFILE
 const getProfile = async (accountId) => {
   const customer = await findCustomer(accountId);
-  return customer;
+  return customer.toJSON();
 };
 
 // UPDATE PROFILE
@@ -26,49 +24,49 @@ const updateProfile = async (accountId, data) => {
   const customer = await findCustomer(accountId);
 
   // safe update
-  if (data.name !== undefined) customer.name = data.name;
-  if (data.phone !== undefined) customer.phone = data.phone;
+  if (data.name !== undefined) customer.name = data.name.trim();
+  if (data.phone !== undefined) customer.phone = data.phone.trim();
   if (data.gender !== undefined) customer.gender = data.gender;
   if (data.dateOfBirth !== undefined) {
     customer.dateOfBirth = data.dateOfBirth;
   }
 
   await customer.save();
-  return customer;
+  return customer.toJSON();
 };
 
 // GET ADDRESSES
 const getAddresses = async (accountId) => {
   const customer = await findCustomer(accountId);
-   // Trường hợp không tìm thấy customer
-   if(!customer)
-   {
-    const err = new Error("Customer not found");
-    err.status = 404;
-    throw err;
-   }
    // Trả về mảng địa chỉ, nếu không có thì trả về mảng rỗng
-    return customer.addresses || [];
+   return (customer.addresses || []).map(addr =>
+  addr.toJSON ? addr.toJSON() : addr
+);
 }
 
 // ADD ADDRESS
 const addAddress = async (accountId, data) => {
   const customer = await findCustomer(accountId);
 
+  const addresses = customer.addresses || [];
+
   // nếu chưa có address → auto default
-  if (customer.addresses.length === 0) {
+  if (addresses.length === 0) {
     data.isDefault = true;
   }
 
   // nếu set default → reset tất cả
   if (data.isDefault) {
-    customer.addresses.forEach(addr => (addr.isDefault = false));
+    addresses.forEach(addr => (addr.isDefault = false));
   }
 
-  customer.addresses.push(data);
+  addresses.push(data);
+
+  // gán lại
+  customer.addresses = addresses;
 
   await customer.save();
-  return customer;
+  return customer.toJSON();
 };
 
 // UPDATE ADDRESS
@@ -83,7 +81,9 @@ const updateAddress = async (accountId, addressId, data) => {
     throw err;
   }
 
-  // update fields
+  // assign là cách nhanh để gán từng trường, nhưng sẽ gán tất cả nên
+  // có thể gây lỗi nếu data có trường không mong muốn. 
+  // Cách an toàn hơn là gán thủ công từng trường như ở updateProfile
   Object.assign(address, data);
 
   // xử lý default
@@ -95,7 +95,7 @@ const updateAddress = async (accountId, addressId, data) => {
   }
 
   await customer.save();
-  return customer;
+  return customer.toJSON();
 };
 
 // DELETE ADDRESS
@@ -110,18 +110,19 @@ const deleteAddress = async (accountId, addressId) => {
     throw err;
   }
 
+  // lưu lại xem cái bị xoá có phải default không
+  const isDeletedDefault = address.isDefault;
+
+  // xoá
   address.deleteOne();
 
-  if (customer.addresses.length > 1) {
-    const hasDefault = customer.addresses.some(addr => addr.isDefault);
-
-    if (!hasDefault) {
-      customer.addresses[0].isDefault = true;
-    }
+  // nếu xoá cái default thì phải set lại
+  if (isDeletedDefault && customer.addresses.length > 0) {
+    customer.addresses[0].isDefault = true;
   }
 
   await customer.save();
-  return customer;
+  return customer.toJSON();
 };
 
 // SET DEFAULT ADDRESS
@@ -142,7 +143,7 @@ const setDefaultAddress = async (accountId, addressId) => {
   });
 
   await customer.save();
-  return customer;
+  return customer.toJSON();
 };
 
 // UPLOAD AVATAR
@@ -153,31 +154,23 @@ const updateAvatar = async (accountIdFromToken, file) => {
     throw err;
   }
 
-  // SỬA TẠI ĐÂY: Dùng đúng tên trường 'accountId' như trong Model
-  const customer = await Customer.findOne({ accountId: accountIdFromToken });
+  const customer = await findCustomer(accountIdFromToken);
 
-  if (!customer) {
-    // Nếu vẫn không thấy, hãy log ra để kiểm tra giá trị ID nhận vào
-    console.log("ID từ token gửi xuống:", accountIdFromToken);
-    const err = new Error("Không tìm thấy khách hàng trong Database");
-    err.status = 404;
-    throw err;
+  try {
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: "dermify/avatar"
+    });
+
+    customer.avatar = result.secure_url;
+    await customer.save();
+
+    return customer.toJSON();
+
+  } finally {
+    if (file?.path && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
   }
-
-  // Upload lên Cloudinary
-  const result = await cloudinary.uploader.upload(file.path, {
-    folder: "dermify/avatar"
-  });
-
-  // Dọn dẹp file tạm (fs.unlinkSync...)
-  if (fs.existsSync(file.path)) {
-    fs.unlinkSync(file.path);
-  }
-
-  customer.avatar = result.secure_url;
-  await customer.save();
-
-  return customer;
 };
 
 module.exports = {
