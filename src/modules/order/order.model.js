@@ -225,7 +225,6 @@ const orderSchema = new mongoose.Schema(
 orderSchema.index({ customerId: 1, createdAt: -1 });
 
 // Index cho orderCode (tìm theo mã đơn)
-//orderSchema.index({ orderCode: 1 });
 
 // Index cho orderStatus (admin filter)
 orderSchema.index({ orderStatus: 1, createdAt: -1 });

@@ -15,7 +15,10 @@ router.put("/admin/orders/:orderId/payment", auth, requireRole("admin", "staff",
 // Customer routes
 router.post("/", auth, orderController.createOrder);
 router.get("/", auth, orderController.getMyOrders);
+router.get("/most-expensive", orderController.getMostExpensiveOrder);
 router.get("/:orderId", auth, orderController.getOrderDetail);
 router.put("/:orderId/cancel", auth, orderController.cancelOrder);
+
+
 
 module.exports = router;

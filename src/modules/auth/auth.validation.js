@@ -1,9 +1,9 @@
 
 // Validation cho route /register
 const validateRegister = (req, res, next) => {
-  let { email, password, name, phone } = req.body;
+  let { email, password, name, phone } = req.body; // Lấy dữ liệu từ req.body để validate ( Này dữ liệu do frontend gửi lên, chưa qua xử lý gì nên rất "bẩn", có thể thiếu trường, sai kiểu dữ liệu, có khoảng trắng thừa, v.v... )
 
-  // 0. kiểm tra kiểu dữ liệu
+  // 0. kiểm tra kiểu dữ liệu ( Dù đã kiểm tra ở frontend nhưng vẫn phải kiểm tra ở backend vì không thể tin tưởng hoàn toàn vào dữ liệu từ client )
   if (
     typeof email !== "string" ||
     typeof password !== "string" ||
@@ -17,7 +17,7 @@ const validateRegister = (req, res, next) => {
 
   // 1. chuẩn hoá
   email = email.trim().toLowerCase();
-  password = password.trim();
+  password = password;
   name = name.trim();
   phone = phone.trim();
 
@@ -66,7 +66,6 @@ const validateRegister = (req, res, next) => {
   req.body.password = password;
   req.body.name = name;
   req.body.phone = phone;
-
   next();
 };
 

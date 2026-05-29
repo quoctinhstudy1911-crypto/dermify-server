@@ -24,7 +24,7 @@ const updateProfile = async (req, res, next) => {
   try {
     const result = await customerService.updateProfile(
       req.user.id,
-      req.body
+      req.body // body chứa dữ liệu từ bên frontend
     );
 
     res.json({

@@ -175,6 +175,8 @@ const getOrderDetail = async (req, res) => {
   }
 };
 
+
+
 /**
  * Cancel Order
  */
@@ -223,9 +225,28 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+// Viết 1 api để lấy đơn hàng có giá trị cao nhất trong tất cả các đơn hàng không cần xét điều kiện trong tất cả đơn hàng
+const getMostExpensiveOrder = async (req, res) => {
+  try {
+    const order = await orderService.getMostExpensiveOrder();
+    return res.status(200).json({
+      success: true,
+      data: order
+    });
+
+  } catch (error) {
+    console.error("Get most expensive order error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi hệ thống"
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getOrderDetail,
-  cancelOrder  
+  cancelOrder,
+  getMostExpensiveOrder
 };

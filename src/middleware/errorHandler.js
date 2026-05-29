@@ -1,5 +1,5 @@
 module.exports = (err, req, res, next) => {
-  console.error(err); // log lỗi
+console.error(err); // log lỗi
 
   // Lỗi Mongoose duplicate key (ví dụ email đã tồn tại)
   if (err.code === 11000) {

@@ -23,6 +23,7 @@ const register = async (req, res, next) => {
   // VERIFY EMAIL
 const verifyEmail = async (req, res, next) => {
   try {
+    // Lấy token từ query parameters
     const { token } = req.query;
 
     const data = await authService.verifyEmail(token);
